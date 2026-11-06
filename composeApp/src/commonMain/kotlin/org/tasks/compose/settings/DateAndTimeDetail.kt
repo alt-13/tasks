@@ -22,12 +22,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.tasks.compose.components.SymbolIcon
 import org.tasks.compose.pickers.TimePickerDialog
 import org.tasks.kmp.formatTime
+import org.tasks.resources.getString
 import org.tasks.themes.TasksIcons
 import org.tasks.time.DateTimeUtils2.currentTimeMillis
 import org.tasks.time.is24HourFormat
