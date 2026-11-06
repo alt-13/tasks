@@ -1,6 +1,8 @@
 name: Run automated checks
 
 on:
+  push:
+    branches: [ios/f1-ci-xcodebuild]
   pull_request:
   workflow_call:
 
