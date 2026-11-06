@@ -9,6 +9,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import org.tasks.extensions.guarded
 import org.tasks.data.entity.Notification
@@ -34,7 +36,7 @@ class NotificationScheduler(
 ) {
     private val wakeUps = Channel<Unit>(Channel.CONFLATED)
 
-    private val lock = Any()
+    private val lock = Mutex()
 
     private var job: Job? = null
 
@@ -42,12 +44,12 @@ class NotificationScheduler(
 
     private var unwinding: List<Job> = emptyList()
 
-    fun start(
+    suspend fun start(
         scope: CoroutineScope,
         context: CoroutineContext = EmptyCoroutineContext,
         reconcile: suspend () -> Unit = {},
     ) {
-        synchronized(lock) {
+        lock.withLock {
             if (job?.isActive == true) {
                 return
             }
@@ -66,7 +68,7 @@ class NotificationScheduler(
     }
 
     suspend fun stop() {
-        val running = synchronized(lock) {
+        val running = lock.withLock {
             (unwinding + listOfNotNull(job, reconcileJob)).distinct().also {
                 this.job = null
                 this.reconcileJob = null
@@ -80,7 +82,7 @@ class NotificationScheduler(
 
         val stopped = withTimeoutOrNull(STOP_TIMEOUT_MS) { running.joinAll() }
         if (stopped == null) {
-            synchronized(lock) {
+            lock.withLock {
                 unwinding = (unwinding + running.filterNot { it.isCompleted }).distinct()
             }
             Logger.w(tag = TAG) { "Timed out waiting for the scan to stop" }
