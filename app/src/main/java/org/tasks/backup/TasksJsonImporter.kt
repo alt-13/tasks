@@ -25,7 +25,6 @@ import com.todoroo.astrid.service.Upgrader.Companion.V6_4
 import com.todoroo.astrid.service.Upgrader.Companion.getAndroidColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -587,20 +586,6 @@ class TasksJsonImporter @Inject constructor(
         var taskCount = 0
         var importCount = 0
         var skipCount = 0
-    }
-
-    @Deprecated("For backup use only")
-    @Serializable
-    class LegacyLocation {
-        var name: String? = null
-        var address: String? = null
-        var phone: String? = null
-        var url: String? = null
-        var latitude = 0.0
-        var longitude = 0.0
-        var radius = 0
-        var arrival = false
-        var departure = false
     }
 
     companion object {

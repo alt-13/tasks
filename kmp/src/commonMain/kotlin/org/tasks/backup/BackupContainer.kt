@@ -1,7 +1,6 @@
 package org.tasks.backup
 
 import kotlinx.serialization.Serializable
-import org.tasks.backup.TasksJsonImporter.LegacyLocation
 import org.tasks.data.GoogleTask
 import org.tasks.data.entity.Alarm
 import org.tasks.data.entity.Attachment
@@ -26,3 +25,17 @@ class TaskBackup(
     val google: List<GoogleTask>? = null,
     val locations: List<LegacyLocation>? = null,
 )
+
+@Deprecated("For backup use only")
+@Serializable
+class LegacyLocation {
+    var name: String? = null
+    var address: String? = null
+    var phone: String? = null
+    var url: String? = null
+    var latitude = 0.0
+    var longitude = 0.0
+    var radius = 0
+    var arrival = false
+    var departure = false
+}
