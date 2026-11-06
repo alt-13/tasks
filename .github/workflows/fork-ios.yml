@@ -163,10 +163,23 @@ jobs:
 
       - name: Boot a simulator
         run: |
-          # Only the runtime matching the selected Xcode's SDK is a valid xcodebuild destination.
-          RUNTIME="iOS-$(xcrun --sdk iphonesimulator --show-sdk-version | tr . -)"
-          UDID="$(xcrun simctl list devices available -j | jq -r --arg rt "$RUNTIME" '[.devices | to_entries[] | select(.key | endswith($rt)) | .value[] | select(.name | test("^iPhone [0-9]+$"))] | last | .udid // empty')"
-          if [ -z "$UDID" ]; then echo "::error::No iPhone simulator for runtime $RUNTIME"; xcrun simctl list runtimes; exit 1; fi
+          # Newest runtime not newer than the SDK (runtimes newer than the SDK aren't valid destinations,
+          # and the image doesn't create devices on every runtime).
+          SDK="$(xcrun --sdk iphonesimulator --show-sdk-version)"
+          UDID="$(xcrun simctl list devices available -j | python3 -c '
+          import json, re, sys
+          sdk = tuple(int(x) for x in sys.argv[1].split(".")[:2])
+          best = None
+          for runtime, devices in json.load(sys.stdin)["devices"].items():
+              m = re.search(r"iOS-(\d+)-(\d+)", runtime)
+              if not m or (version := (int(m[1]), int(m[2]))) > sdk:
+                  continue
+              for device in devices:
+                  if re.fullmatch(r"iPhone \d+", device["name"]) and (best is None or version >= best[0]):
+                      best = (version, device["udid"])
+          print(best[1] if best else "")
+          ' "$SDK")"
+          if [ -z "$UDID" ]; then echo "::error::No iPhone simulator for SDK $SDK"; xcrun simctl list devices available; exit 1; fi
           xcrun simctl boot "$UDID"
           echo "UDID=$UDID" >> "$GITHUB_ENV"
 
