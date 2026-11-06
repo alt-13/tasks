@@ -148,3 +148,26 @@ platform :android do
     end
   end
 end
+
+platform :ios do
+  desc "Archive and upload to TestFlight"
+  lane :beta do
+    key_path = ENV.fetch("ASC_KEY_PATH") # absolute path to the App Store Connect API key (.p8)
+    key_id = ENV.fetch("ASC_KEY_ID")
+    issuer_id = ENV.fetch("ASC_ISSUER_ID")
+    team_id = ENV.fetch("IOS_TEAM_ID")
+    api_key = app_store_connect_api_key(key_id: key_id, issuer_id: issuer_id, key_filepath: key_path)
+    # Automatic signing: xcodebuild fetches certificates and profiles with the API key, nothing to install
+    auth = "-allowProvisioningUpdates -authenticationKeyPath #{key_path.shellescape} -authenticationKeyID #{key_id} -authenticationKeyIssuerID #{issuer_id}"
+    build_app(
+      project: "iosApp/iosApp.xcodeproj",
+      scheme: "iosApp",
+      configuration: "Release",
+      export_method: "app-store",
+      export_team_id: team_id,
+      xcargs: "#{auth} TEAM_ID=#{team_id}",
+      export_xcargs: auth,
+    )
+    upload_to_testflight(api_key: api_key, skip_waiting_for_build_processing: true)
+  end
+end
