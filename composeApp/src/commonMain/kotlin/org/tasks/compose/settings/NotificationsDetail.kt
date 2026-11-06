@@ -14,6 +14,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.tasks.extensions.openSystemNotificationSettings
@@ -30,6 +32,8 @@ fun NotificationsDetail(
 ) {
     val viewModel = koinViewModel<NotificationsViewModel>()
     val uriHandler = LocalUriHandler.current
+    // also catches the return from the system settings app
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refreshPermission() }
 
     Scaffold(
         topBar = {

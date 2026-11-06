@@ -43,6 +43,7 @@ import tasks.kmp.generated.resources.more_settings
 import tasks.kmp.generated.resources.notification_disable_battery_optimizations_description
 import tasks.kmp.generated.resources.notification_troubleshooting_summary
 import tasks.kmp.generated.resources.notifications
+import tasks.kmp.generated.resources.notifications_denied
 import tasks.kmp.generated.resources.persistent_notifications
 import tasks.kmp.generated.resources.persistent_notifications_description
 import tasks.kmp.generated.resources.quiet_hours
@@ -83,6 +84,7 @@ private fun timeSummary(millisOfDay: Int, is24HourFormat: Boolean): String =
 fun NotificationsScreen(
     is24HourFormat: Boolean,
     isCurrentlyQuietHours: Boolean,
+    notificationsDenied: Boolean,
     showTroubleshooting: Boolean,
     showBatteryOptimization: Boolean,
     showNotificationsEnabled: Boolean,
@@ -131,6 +133,18 @@ fun NotificationsScreen(
             .verticalScroll(rememberScrollState())
     ) {
         Spacer(modifier = Modifier.height(SettingsContentPadding))
+
+        if (notificationsDenied) {
+            DangerCard(
+                icon = TasksIcons.NOTIFICATIONS_OFF,
+                title = stringResource(Res.string.notifications_denied),
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(horizontal = SettingsContentPadding),
+                onClick = onMoreSettings,
+                trailingIcon = TasksIcons.OPEN_IN_NEW,
+            )
+            Spacer(modifier = Modifier.height(SettingsContentPadding))
+        }
 
         if (isCurrentlyQuietHours) {
             DangerCard(
