@@ -84,7 +84,11 @@ jobs:
 
       - name: Select Xcode
         run: |
-          XCODE="$(find /Applications -maxdepth 1 -name "Xcode_${XCODE_MAJOR}*.app" | sort -V | tail -1)"
+          # Prefer the image default: newer side-by-side Xcodes (betas, RCs) may lack a matching simulator runtime.
+          XCODE=/Applications/Xcode.app
+          if [ "$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' "$XCODE/Contents/Info.plist" | cut -d. -f1)" != "$XCODE_MAJOR" ]; then
+            XCODE="$(find /Applications -maxdepth 1 -name "Xcode_${XCODE_MAJOR}*.app" | sort -V | tail -1)"
+          fi
           if [ -z "$XCODE" ]; then echo "::error::No Xcode ${XCODE_MAJOR} on this runner image"; exit 1; fi
           sudo xcode-select -s "$XCODE"
           xcodebuild -version
@@ -145,7 +149,11 @@ jobs:
 
       - name: Select Xcode
         run: |
-          XCODE="$(find /Applications -maxdepth 1 -name "Xcode_${XCODE_MAJOR}*.app" | sort -V | tail -1)"
+          # Prefer the image default: newer side-by-side Xcodes (betas, RCs) may lack a matching simulator runtime.
+          XCODE=/Applications/Xcode.app
+          if [ "$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' "$XCODE/Contents/Info.plist" | cut -d. -f1)" != "$XCODE_MAJOR" ]; then
+            XCODE="$(find /Applications -maxdepth 1 -name "Xcode_${XCODE_MAJOR}*.app" | sort -V | tail -1)"
+          fi
           if [ -z "$XCODE" ]; then echo "::error::No Xcode ${XCODE_MAJOR} on this runner image"; exit 1; fi
           sudo xcode-select -s "$XCODE"
           xcodebuild -version
@@ -235,7 +243,11 @@ jobs:
 
       - name: Select Xcode
         run: |
-          XCODE="$(find /Applications -maxdepth 1 -name "Xcode_${XCODE_MAJOR}*.app" | sort -V | tail -1)"
+          # Prefer the image default: newer side-by-side Xcodes (betas, RCs) may lack a matching simulator runtime.
+          XCODE=/Applications/Xcode.app
+          if [ "$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' "$XCODE/Contents/Info.plist" | cut -d. -f1)" != "$XCODE_MAJOR" ]; then
+            XCODE="$(find /Applications -maxdepth 1 -name "Xcode_${XCODE_MAJOR}*.app" | sort -V | tail -1)"
+          fi
           if [ -z "$XCODE" ]; then echo "::error::No Xcode ${XCODE_MAJOR} on this runner image"; exit 1; fi
           sudo xcode-select -s "$XCODE"
           xcodebuild -version
@@ -335,7 +347,11 @@ jobs:
 
       - name: Select Xcode
         run: |
-          XCODE="$(find /Applications -maxdepth 1 -name "Xcode_${XCODE_MAJOR}*.app" | sort -V | tail -1)"
+          # Prefer the image default: newer side-by-side Xcodes (betas, RCs) may lack a matching simulator runtime.
+          XCODE=/Applications/Xcode.app
+          if [ "$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' "$XCODE/Contents/Info.plist" | cut -d. -f1)" != "$XCODE_MAJOR" ]; then
+            XCODE="$(find /Applications -maxdepth 1 -name "Xcode_${XCODE_MAJOR}*.app" | sort -V | tail -1)"
+          fi
           if [ -z "$XCODE" ]; then echo "::error::No Xcode ${XCODE_MAJOR} on this runner image"; exit 1; fi
           sudo xcode-select -s "$XCODE"
           xcodebuild -version
