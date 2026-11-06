@@ -427,4 +427,7 @@
     <string name="mcp_tools_group_reminders">Priminimai</string>
     <string name="mcp_copy">Kopijuoti</string>
     <string name="new_filter">Sukurti naują filtrą</string>
+    <string name="always_display_full_date">Rodyti pilną datą</string>
+    <string name="date_shortcut_must_come_before">%1$s turi būti prieš %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s turi būti po %2$s</string>
 </resources>

@@ -714,4 +714,7 @@
     <string name="subscription_ended_on">已于 %1$s 结束</string>
     <string name="subscription_free_until">免费直到 %1$s，然后 %2$s</string>
     <string name="subscription_payment_failed">付款失败，更新您的卡片</string>
+    <string name="always_display_full_date">显示完整日期</string>
+    <string name="date_shortcut_must_come_before">%1$s 必须在 %2$s 之前</string>
+    <string name="date_shortcut_must_come_after">%1$s 必须在 %2$s 之后</string>
 </resources>

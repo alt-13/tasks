@@ -723,4 +723,7 @@
     <string name="subscription_ended_on">Udløbet %1$s</string>
     <string name="subscription_free_until">Gratis indtil %1$s, derefter %2$s</string>
     <string name="subscription_payment_failed">Betalingen mislykkedes. Opdater dit betalingskort</string>
+    <string name="always_display_full_date">Vis fuld dato</string>
+    <string name="date_shortcut_must_come_before">%1$s skal komme før %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s skal komme efter %2$s</string>
 </resources>

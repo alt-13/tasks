@@ -520,4 +520,7 @@
     <string name="mcp_copy">Másolás</string>
     <string name="new_filter">Új szűrő létrehozása</string>
     <string name="subscription_required">Előfizetés szükséges</string>
+    <string name="always_display_full_date">Teljes dátum mutatása</string>
+    <string name="date_shortcut_must_come_before">%1$s-nek %2$s előtt kell jönnie</string>
+    <string name="date_shortcut_must_come_after">	%1$s-nek %2$s után kell jönnie</string>
 </resources>

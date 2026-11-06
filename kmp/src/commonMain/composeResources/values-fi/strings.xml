@@ -474,4 +474,7 @@
     <string name="mcp_copy">Kopio</string>
     <string name="new_filter">Luo uusi suodatin</string>
     <string name="subscription_required">Tilaus vaaditaan</string>
+    <string name="always_display_full_date">Näytä koko päivämäärä</string>
+    <string name="date_shortcut_must_come_before">%1$s on oltava ennen %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s on oltava jälkeen %2$s</string>
 </resources>

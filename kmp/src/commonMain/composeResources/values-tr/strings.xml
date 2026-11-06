@@ -723,4 +723,7 @@
     <string name="subscription_ended_on">Bitti: %1$s</string>
     <string name="subscription_free_until">Şuna dek ücretsiz: %1$s, sonrası %2$s</string>
     <string name="subscription_payment_failed">Ödeme başarısız, kartınızı güncelleyin</string>
+    <string name="always_display_full_date">Tam tarihi göster</string>
+    <string name="date_shortcut_must_come_before">%1$s, %2$s öncesinden gelmelidir</string>
+    <string name="date_shortcut_must_come_after">%1$s, %2$s ardından gelmelidir</string>
 </resources>

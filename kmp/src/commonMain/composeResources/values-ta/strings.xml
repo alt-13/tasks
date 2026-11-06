@@ -459,4 +459,7 @@
     <string name="mcp_tools_group_reminders">நினைவூட்டல்கள்</string>
     <string name="mcp_copy">நகலெடுக்கவும்</string>
     <string name="new_filter">புதிய வடிப்பானை உருவாக்கவும்</string>
+    <string name="always_display_full_date">முழு தேதியை காண்பி</string>
+    <string name="date_shortcut_must_come_before">%1$s %2$s க்கு முன் வர வேண்டும்</string>
+    <string name="date_shortcut_must_come_after">%1$s %2$s க்குப் பிறகு வர வேண்டும்</string>
 </resources>

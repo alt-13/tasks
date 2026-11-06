@@ -455,4 +455,7 @@
     <string name="mcp_tools_group_reminders">Υπενθυμίσεις</string>
     <string name="mcp_copy">Αντιγραφή</string>
     <string name="new_filter">Δημιουργία νέου φίλτρου</string>
+    <string name="always_display_full_date">Εμφάνιση Πλήρους Ημερομηνίας</string>
+    <string name="date_shortcut_must_come_before">%1$s πρέπει να είναι πριν από το %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s πρέπει να είναι μετά από το %2$s</string>
 </resources>

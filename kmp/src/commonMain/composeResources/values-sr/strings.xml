@@ -706,4 +706,7 @@
     <string name="repeat_type_due_description">Задатак се понавља на основу тога када је требало да буде завршен</string>
     <string name="repeat_type_completion_description">Задатак се понавља на основу тога када је заиста завршен</string>
     <string name="snoozed_reminder">Одложен подсетник</string>
+    <string name="always_display_full_date">Прикажи пун датум</string>
+    <string name="date_shortcut_must_come_before">%1$s мора бити пре %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s мора бити након %2$s</string>
 </resources>

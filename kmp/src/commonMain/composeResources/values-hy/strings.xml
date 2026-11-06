@@ -132,4 +132,7 @@
     <string name="legal_disclosure_prefix_using">Օգտագործելով Tasks.org-ը</string>
     <string name="tos_updated_title">Մենք թարմացրել ենք մեր օգտագործման պայմանները</string>
     <string name="accept">Ընդունել</string>
+    <string name="always_display_full_date">Ցուցադրել լրիվ ամսաթիվը</string>
+    <string name="date_shortcut_must_come_before">%1$s-ը պետք է լինի %2$s-ից առաջ</string>
+    <string name="date_shortcut_must_come_after">%1$s-ը պետք է լինի %2$s-ից հետո</string>
 </resources>

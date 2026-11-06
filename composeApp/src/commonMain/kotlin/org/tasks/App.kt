@@ -3117,6 +3117,13 @@ private fun SettingsScreen(
                             onSubscribe = onUpgradeClick,
                         )
                     }
+                    is org.tasks.compose.settings.SettingsDestination.DateAndTime -> {
+                        org.tasks.compose.settings.DateAndTimeDetail(
+                            onNavigateBack = {
+                                scope.launch { navigator.navigateBack() }
+                            },
+                        )
+                    }
                     is org.tasks.compose.settings.SettingsDestination.NavigationDrawer -> {
                         NavigationDrawerDetail(
                             onNavigateBack = {

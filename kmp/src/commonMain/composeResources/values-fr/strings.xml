@@ -743,4 +743,7 @@
     <string name="subscription_free_until">Gratuit jusqu\'au %1$s, puis %2$s</string>
     <string name="subscription_payment_failed">Le paiement a échoué, veuillez mettre à jour les informations de votre carte</string>
     <string name="change_plan">Modifier le forfait</string>
+    <string name="always_display_full_date">Afficher la date complète</string>
+    <string name="date_shortcut_must_come_before">%1$s doit venir avant %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s doit venir après %2$s</string>
 </resources>

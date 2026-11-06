@@ -535,4 +535,7 @@
     <string name="mcp_tools_group_reminders">تذكيرات</string>
     <string name="mcp_copy">نسخ</string>
     <string name="new_filter">أنشأ تصفيةً جديدة</string>
+    <string name="always_display_full_date">أظهر التاريخ الكامل</string>
+    <string name="date_shortcut_must_come_before">يجب أن يكون %1$s قبل %2$s</string>
+    <string name="date_shortcut_must_come_after">يجب أن يكون %1$s بعد %2$s</string>
 </resources>

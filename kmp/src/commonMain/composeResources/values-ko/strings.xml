@@ -717,4 +717,7 @@
     <string name="subscription_free_until">%1$s까지 무료, 이후 %2$s</string>
     <string name="subscription_payment_failed">결제 실패, 카드를 수정하세요</string>
     <string name="change_plan_message">오늘부터 %1$s 구독으로 변경됩니다. 현재 구독에서 남은 차액은 계좌에 입금되거나 이번 청구에 적용됩니다.</string>
+    <string name="always_display_full_date">일시 간략화하지 않고 그대로 표시</string>
+    <string name="date_shortcut_must_come_before">%1$s 는 %2$s 보다 이전에 위치해야 합니다</string>
+    <string name="date_shortcut_must_come_after">%1$s 는 %2$s 보다 이후에 위치해야 합니다</string>
 </resources>

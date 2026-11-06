@@ -582,4 +582,7 @@
     <string name="mcp_copied">Copiato</string>
     <string name="mcp_hide">Nascondi</string>
     <string name="subscription_required">Richiede un abbonamento</string>
+    <string name="always_display_full_date">Mostra data completa</string>
+    <string name="date_shortcut_must_come_before">%1$s deve precedere %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s deve essere successiva a %2$s</string>
 </resources>

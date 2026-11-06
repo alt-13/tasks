@@ -617,4 +617,7 @@
     <string name="mcp_copy">Kopírovat</string>
     <string name="new_filter">Vytvořit nový filtr</string>
     <string name="subscription_required">Vyžadováno předplatné</string>
+    <string name="always_display_full_date">Zobrazit celé datum</string>
+    <string name="date_shortcut_must_come_before">%1$s musí být před %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s musí být po %2$s</string>
 </resources>

@@ -723,4 +723,7 @@
     <string name="subscription_ended_on">Beëindigd per %1$s</string>
     <string name="subscription_free_until">Gratis tot %1$s, daarna %2$s</string>
     <string name="subscription_payment_failed">Betaling mislukt, betaalwijze bijwerken</string>
+    <string name="always_display_full_date">Volledige datum tonen</string>
+    <string name="date_shortcut_must_come_before">%1$s moet voor %2$s komen</string>
+    <string name="date_shortcut_must_come_after">%1$s moet na %2$s komen</string>
 </resources>

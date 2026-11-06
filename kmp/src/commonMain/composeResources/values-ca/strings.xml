@@ -475,4 +475,7 @@
     <string name="mcp_tools_group_reminders">Recordatoris</string>
     <string name="mcp_copy">Copia</string>
     <string name="new_filter">Crea un filtre</string>
+    <string name="always_display_full_date">Mostra la data completa</string>
+    <string name="date_shortcut_must_come_before">%1$s ha d\'anar abans de %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s ha d\'anar després de %2$s</string>
 </resources>
