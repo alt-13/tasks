@@ -625,6 +625,7 @@
     <string name="menu_discard_changes">Discard changes</string>
     <string name="more_options">More options</string>
     <string name="mark_completed">Mark completed</string>
+    <string name="notifications_denied">Notifications are turned off</string>
     <string name="quiet_hours_in_effect">Quiet hours are in effect</string>
     <string name="troubleshooting">Troubleshooting</string>
     <string name="notification_troubleshooting_summary">Tap here if you are having trouble with notifications</string>

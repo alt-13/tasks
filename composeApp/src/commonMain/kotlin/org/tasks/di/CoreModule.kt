@@ -63,6 +63,7 @@ import org.tasks.data.entity.Alarm
 import org.tasks.data.entity.Place
 import org.tasks.data.getOrCreateDefaultListFilter
 import org.tasks.extensions.guarded
+import org.tasks.extensions.notificationPermission
 import org.tasks.fcm.FcmTokenProvider
 import org.tasks.fcm.PushTokenManager
 import org.tasks.filters.CaldavListCache
@@ -464,6 +465,7 @@ val coreModule: Module = module {
                 }
                 notifier.triggerNotifications()
             },
+            notificationPermission = ::notificationPermission,
         )
     }
     viewModel {

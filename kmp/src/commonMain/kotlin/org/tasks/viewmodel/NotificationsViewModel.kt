@@ -12,6 +12,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.tasks.PlatformConfiguration
+import org.tasks.notifications.NotificationPermission
 import org.tasks.preferences.AppPreferences
 import org.tasks.preferences.NotificationSettings
 import org.tasks.preferences.isCurrentlyQuietHours
@@ -32,6 +33,9 @@ open class NotificationsViewModel(
     platformConfiguration: PlatformConfiguration,
     private val persistenceScope: CoroutineScope,
     private val rescheduleNotifications: suspend (ReminderChange) -> Unit,
+    private val notificationPermission: suspend () -> NotificationPermission = {
+        NotificationPermission.GRANTED
+    },
 ) : ViewModel() {
 
     enum class TimePickerTarget {
@@ -71,6 +75,9 @@ open class NotificationsViewModel(
     var showSnoozeDialog by mutableStateOf(false)
         private set
 
+    var notificationsDenied by mutableStateOf(false)
+        private set
+
     var timePickerTarget by mutableStateOf<TimePickerTarget?>(null)
         private set
 
@@ -108,6 +115,12 @@ open class NotificationsViewModel(
     }
 
     open fun refreshState() = writes.refresh()
+
+    fun refreshPermission() {
+        viewModelScope.launch {
+            notificationsDenied = notificationPermission() == NotificationPermission.DENIED
+        }
+    }
 
     private fun persist(block: suspend () -> Unit) = writes.write(block)
 

@@ -44,6 +44,7 @@ fun NotificationsContent(
     NotificationsScreen(
         is24HourFormat = is24HourFormat,
         isCurrentlyQuietHours = viewModel.isCurrentlyQuietHours,
+        notificationsDenied = viewModel.notificationsDenied,
         showTroubleshooting = viewModel.showTroubleshooting,
         showBatteryOptimization = viewModel.showBatteryOptimization,
         showNotificationsEnabled = viewModel.showNotificationsEnabled,

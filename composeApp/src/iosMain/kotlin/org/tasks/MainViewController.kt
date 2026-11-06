@@ -1,20 +1,25 @@
 package org.tasks
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.window.ComposeUIViewController
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.compose.koinInject
 import org.koin.core.context.startKoin
 import org.koin.mp.KoinPlatform
 import org.tasks.auth.TasksServerEnvironment
+import org.tasks.broadcast.ComposeRefreshBroadcaster
 import org.tasks.caldav.CaldavClient
+import org.tasks.data.dao.AlarmDao
 import org.tasks.di.coreModule
 import org.tasks.di.platformModule
+import org.tasks.extensions.requestNotificationPermissionIfNeeded
 import org.tasks.logging.setupLogging
 import org.tasks.preferences.AppPreferences
 import org.tasks.preferences.recordInstallIfNeeded
@@ -79,6 +84,18 @@ fun MainViewController() = ComposeUIViewController {
     val serverEnv = koinInject<TasksServerEnvironment>()
     val scope = rememberCoroutineScope()
     var currentEnv by remember { mutableStateOf(serverEnv.currentEnvironment) }
+    val platformConfig = koinInject<PlatformConfiguration>()
+    val refreshBroadcaster = koinInject<ComposeRefreshBroadcaster>()
+    val alarmDao = koinInject<AlarmDao>()
+    LaunchedEffect(Unit) {
+        if (!platformConfig.supportsNotifications) {
+            return@LaunchedEffect
+        }
+        // a saved or synced reminder broadcasts a refresh
+        refreshBroadcaster.refreshes
+            .onStart { emit(Unit) }
+            .collect { requestNotificationPermissionIfNeeded(alarmDao) }
+    }
     App(
         openUrl = { url ->
             NSURL.URLWithString(url)?.let { UIApplication.sharedApplication.openURL(it) }
