@@ -705,4 +705,7 @@
     <string name="error_no_purchase_found">我们找不到该邮箱的购买</string>
     <string name="restore_renewal_settling">您的续费仍在进行</string>
     <string name="purchases_restored">恢复了购买</string>
+    <string name="always_display_full_date">显示完整日期</string>
+    <string name="date_shortcut_must_come_before">%1$s 必须在 %2$s 之前</string>
+    <string name="date_shortcut_must_come_after">%1$s 必须在 %2$s 之后</string>
 </resources>

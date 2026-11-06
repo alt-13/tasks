@@ -473,4 +473,7 @@
     <string name="mcp_tools_group_reminders">Pripomienky</string>
     <string name="mcp_copy">Kopírovať</string>
     <string name="new_filter">Vytvoriť nový filter</string>
+    <string name="always_display_full_date">Zobraziť celý dátum</string>
+    <string name="date_shortcut_must_come_before">%1$s musí predchádzať %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s musí nasledovať po %2$s</string>
 </resources>

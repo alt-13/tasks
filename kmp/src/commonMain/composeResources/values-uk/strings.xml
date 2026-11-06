@@ -503,4 +503,7 @@
     <string name="accept">Прийняти</string>
     <string name="email_to_task">Е-лист до завдання</string>
     <string name="subscription_required">Потрібна передплата</string>
+    <string name="always_display_full_date">Показати повну дату</string>
+    <string name="date_shortcut_must_come_before">%1$s має бути до %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s має бути після %2$s</string>
 </resources>

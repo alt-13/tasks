@@ -617,4 +617,7 @@
     <string name="mcp_copy">Kopiraj</string>
     <string name="new_filter">Stvori filtar</string>
     <string name="subscription_required">Potrebna je pretplata</string>
+    <string name="always_display_full_date">Pokaži potpuni datum</string>
+    <string name="date_shortcut_must_come_before">%1$s mora doći prije %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s mora doći nakon %2$s</string>
 </resources>

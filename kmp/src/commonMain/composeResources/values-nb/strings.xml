@@ -436,4 +436,7 @@
     <string name="mcp_tools_group_reminders">Påminnelser</string>
     <string name="mcp_copy">Kopier</string>
     <string name="new_filter">Opprett nytt filter</string>
+    <string name="always_display_full_date">Vis full dato</string>
+    <string name="date_shortcut_must_come_before">%1$s må komme før %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s må komme etter %2$s</string>
 </resources>

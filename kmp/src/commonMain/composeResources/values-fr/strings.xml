@@ -734,4 +734,7 @@
     <string name="restore_renewal_settling">Votre renouvellement est toujours en cours de traitement</string>
     <string name="purchases_restored">Achats restaurés</string>
     <string name="card_subscription">Abonnement par carte bancaire</string>
+    <string name="always_display_full_date">Afficher la date complète</string>
+    <string name="date_shortcut_must_come_before">%1$s doit venir avant %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s doit venir après %2$s</string>
 </resources>

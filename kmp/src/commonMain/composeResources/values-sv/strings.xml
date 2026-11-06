@@ -617,4 +617,7 @@
     <string name="mcp_copy">Kopiera</string>
     <string name="new_filter">Skapa ett nytt filter</string>
     <string name="subscription_required">Prenumeration krävs</string>
+    <string name="always_display_full_date">Visa hela datumet</string>
+    <string name="date_shortcut_must_come_before">%1$s måste komma före %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s måste komma efter %2$s</string>
 </resources>

@@ -502,4 +502,7 @@
     <string name="mcp_copy">Copiază</string>
     <string name="new_filter">Crează filtru nou</string>
     <string name="subscription_required">Este necesar un abonament</string>
+    <string name="always_display_full_date">Afișează data completă</string>
+    <string name="date_shortcut_must_come_before">%1$s trebuie să vină înainte de %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s trebuie să vină după %2$s</string>
 </resources>

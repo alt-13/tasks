@@ -169,4 +169,7 @@
     <string name="works_with_desktop">Kompyuter uchun Tasks.org</string>
     <string name="blog_feed_none">Yo\'q</string>
     <string name="new_filter">Yangi filtr yaratish</string>
+    <string name="always_display_full_date">To\'liq sanani ko\'rsatish</string>
+    <string name="date_shortcut_must_come_before">%1$s, %2$s dan oldin kelishi kerak</string>
+    <string name="date_shortcut_must_come_after">%1$s, %2$s dan keyin kelishi kerak</string>
 </resources>

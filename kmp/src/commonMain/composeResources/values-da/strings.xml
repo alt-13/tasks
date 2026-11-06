@@ -703,4 +703,7 @@
     <string name="checkout_expired">Betalingssiden er udløbet. Prøv igen.</string>
     <string name="pricing_free_trial">Gratis prøveperiode i %1$d dage</string>
     <string name="pricing_subscribe_for">Abonner for %1$s</string>
+    <string name="always_display_full_date">Vis fuld dato</string>
+    <string name="date_shortcut_must_come_before">%1$s skal komme før %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s skal komme efter %2$s</string>
 </resources>

@@ -714,4 +714,7 @@
     <string name="restore_renewal_settling">Sinu tellimuse uuendamine on veel töös</string>
     <string name="purchases_restored">Ostud on taastatud</string>
     <string name="card_subscription">Tellimus kaardiga</string>
+    <string name="always_display_full_date">Näita pikka kuupäeva</string>
+    <string name="date_shortcut_must_come_before">%1$s peab olema enne %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s peab olema peale %2$s</string>
 </resources>

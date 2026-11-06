@@ -709,4 +709,7 @@
     <string name="works_with_submit_pull_request">Enviar um pull request</string>
     <string name="new_place">Criar novo local</string>
     <string name="subscription_required">Inscrição necessária</string>
+    <string name="always_display_full_date">Mostrar data completa</string>
+    <string name="date_shortcut_must_come_before">%1$s deve vir antes de %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s deve vir depois de %2$s</string>
 </resources>

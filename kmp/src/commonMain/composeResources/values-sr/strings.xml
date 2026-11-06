@@ -660,4 +660,7 @@
     <string name="works_with_mcp_description">Дозволи AI асистенту да чита и ажурира твоје задатке</string>
     <string name="works_with_android">Tasks.org за Андроид</string>
     <string name="subscription_required">Потребна је претплата</string>
+    <string name="always_display_full_date">Прикажи пун датум</string>
+    <string name="date_shortcut_must_come_before">%1$s мора бити пре %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s мора бити након %2$s</string>
 </resources>

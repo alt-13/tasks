@@ -703,4 +703,7 @@
     <string name="checkout_expired">Ödeme sayfasının süresi doldu. Lütfen tekrar deneyin.</string>
     <string name="pricing_free_trial">%1$d günlük ücretsiz deneme</string>
     <string name="pricing_subscribe_for">%1$s için abone olun</string>
+    <string name="always_display_full_date">Tam tarihi göster</string>
+    <string name="date_shortcut_must_come_before">%1$s, %2$s öncesinden gelmelidir</string>
+    <string name="date_shortcut_must_come_after">%1$s, %2$s ardından gelmelidir</string>
 </resources>

@@ -408,4 +408,7 @@
     <string name="mcp_tools_group_reminders">Oroigarriak</string>
     <string name="mcp_copy">Kopiatu</string>
     <string name="new_filter">Sortu iragazki berria</string>
+    <string name="always_display_full_date">Erakutsi data osoa</string>
+    <string name="date_shortcut_must_come_before">%1$s %2$s aurretik gertatu behar da</string>
+    <string name="date_shortcut_must_come_after">%1$s %2$s eta gero gertatu behar da</string>
 </resources>

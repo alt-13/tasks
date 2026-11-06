@@ -714,4 +714,7 @@
     <string name="error_no_purchase_found">Geen aankoop gevonden voor dat e-mailadres</string>
     <string name="restore_renewal_settling">Je verlenging wordt toch verwerkt</string>
     <string name="purchases_restored">Aankopen hersteld</string>
+    <string name="always_display_full_date">Volledige datum tonen</string>
+    <string name="date_shortcut_must_come_before">%1$s moet voor %2$s komen</string>
+    <string name="date_shortcut_must_come_after">%1$s moet na %2$s komen</string>
 </resources>

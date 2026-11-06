@@ -478,4 +478,7 @@
     <string name="mcp_tools_group_reminders">Przypomnienia</string>
     <string name="mcp_copy">Kopiuj</string>
     <string name="new_filter">Stwórz nowy filtr</string>
+    <string name="always_display_full_date">Pokaż pełną datę</string>
+    <string name="date_shortcut_must_come_before">%1$s musi być przed %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s musi być po %2$s</string>
 </resources>

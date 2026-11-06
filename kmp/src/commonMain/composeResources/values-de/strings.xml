@@ -689,4 +689,7 @@
     <string name="new_place">Neuen Ort erstellen</string>
     <string name="mcp_tools_group_accounts">Synchronisierungskonten</string>
     <string name="subscription_required">Abo erforderlich</string>
+    <string name="always_display_full_date">Datum ganz anzeigen</string>
+    <string name="date_shortcut_must_come_before">%1$s muss vor %2$s kommen</string>
+    <string name="date_shortcut_must_come_after">%1$s muss nach %2$s kommen</string>
 </resources>

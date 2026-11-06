@@ -727,4 +727,7 @@
     <string name="reset_trusted_certificates">Reset trusted certificates</string>
     <string name="reset_trusted_certificates_summary">Forget certificates and certificate authorities you accepted for servers</string>
     <string name="trusted_certificates_reset">Trusted certificates reset</string>
+    <string name="always_display_full_date">Show full date</string>
+    <string name="date_shortcut_must_come_before">%1$s must come before %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s must come after %2$s</string>
 </resources>

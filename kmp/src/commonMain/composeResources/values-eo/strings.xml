@@ -714,4 +714,7 @@
     <string name="trusted_certificates_reset">Restarigo de fidinda atestilo</string>
     <string name="card_subscription">Kreditkarta abonaĵo</string>
     <string name="error_billing_unavailable">Fakturado ne funkcias nuntempe. Bonvolu reprovi poste.</string>
+    <string name="always_display_full_date">Vidigi tutan daton</string>
+    <string name="date_shortcut_must_come_before">%1$s devas esti antaŭ %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s devas esti post %2$s</string>
 </resources>

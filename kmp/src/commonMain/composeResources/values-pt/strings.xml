@@ -566,4 +566,7 @@
     <string name="mcp_copy">Copiar</string>
     <string name="new_filter">Criar novo filtro</string>
     <string name="subscription_required">Inscrição necessária</string>
+    <string name="always_display_full_date">Mostrar data completa</string>
+    <string name="date_shortcut_must_come_before">%1$s tem que ser antes de %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s tem que ser depois de %2$s</string>
 </resources>

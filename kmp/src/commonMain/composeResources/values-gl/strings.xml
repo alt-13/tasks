@@ -455,4 +455,7 @@
     <string name="mcp_tools_group_reminders">Recordatorios</string>
     <string name="mcp_copy">Copiar</string>
     <string name="new_filter">Crear novo filtro</string>
+    <string name="always_display_full_date">Amosar data completa</string>
+    <string name="date_shortcut_must_come_before">%1$s debe vir antes de %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s debe venir depois de %2$s</string>
 </resources>

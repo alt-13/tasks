@@ -591,4 +591,7 @@
     <string name="mcp_copy">העתקה</string>
     <string name="new_filter">יצירת מסנן חדש</string>
     <string name="subscription_required">נדרש מינוי</string>
+    <string name="always_display_full_date">הצגת תאריך מלא</string>
+    <string name="date_shortcut_must_come_before">%1$s חייב לבוא לפני %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s חייב לבוא אחרי %2$s</string>
 </resources>

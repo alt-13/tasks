@@ -594,4 +594,7 @@
     <string name="name_your_price_blurb">Заплатите столько, сколько хотите, чтобы разблокировать темы, значки и эти расширенные функции синхронизации</string>
     <string name="upgrade">Улучшить</string>
     <string name="supporter_summary_no_price">Спасибо!</string>
+    <string name="always_display_full_date">Показать полную дату</string>
+    <string name="date_shortcut_must_come_before">%1$s должно идти перед %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s должно идти после %2$s</string>
 </resources>

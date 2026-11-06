@@ -394,4 +394,7 @@
     <string name="mcp_tools_group_reminders">මතක් කිරීම්</string>
     <string name="mcp_copy">පිටපත් කරන්න</string>
     <string name="new_filter">නව පෙරණයක් සැකසීම</string>
+    <string name="always_display_full_date">සම්පූර්ණ දිනය පෙන්වන්න</string>
+    <string name="date_shortcut_must_come_before">%2$s පෙර %1$s පැමිණිය යුතුය</string>
+    <string name="date_shortcut_must_come_after">%1$s, %2$s ට පසුව පැමිණිය යුතුය</string>
 </resources>

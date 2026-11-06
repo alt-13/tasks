@@ -102,4 +102,7 @@
     <string name="mcp_tools_group_reminders">Հիշեցումներ</string>
     <string name="mcp_copy">Պատճենել</string>
     <string name="new_filter">Ստեղծել նոր ֆիլտր</string>
+    <string name="always_display_full_date">Ցուցադրել լրիվ ամսաթիվը</string>
+    <string name="date_shortcut_must_come_before">%1$s-ը պետք է լինի %2$s-ից առաջ</string>
+    <string name="date_shortcut_must_come_after">%1$s-ը պետք է լինի %2$s-ից հետո</string>
 </resources>

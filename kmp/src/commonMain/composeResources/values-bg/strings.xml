@@ -551,4 +551,7 @@
     <string name="mcp_copy">Копиране</string>
     <string name="new_filter">Нов филтър</string>
     <string name="subscription_required">Изисква абонамент</string>
+    <string name="always_display_full_date">Показване на цялата дата</string>
+    <string name="date_shortcut_must_come_before">%1$s трябва да дойде преди %2$s</string>
+    <string name="date_shortcut_must_come_after">%1$s трябва да дойде след %2$s</string>
 </resources>
