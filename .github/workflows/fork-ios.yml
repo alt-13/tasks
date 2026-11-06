@@ -41,8 +41,8 @@ on:
         options: [altool, xcodebuild]
         default: altool
       xcode:
-        description: Xcode major version (keep in sync with upstream check.yml)
-        default: "26"
+        description: Xcode major version for building the app (26 = macos-latest, else the xcode-<major> preview image)
+        default: "27"
 
 permissions:
   contents: read
@@ -57,6 +57,8 @@ jobs:
   tests:
     if: inputs.tests
     runs-on: macos-latest
+    env:
+      XCODE_MAJOR: "26" # mirrors upstream check.yml iosTest
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v7
@@ -110,7 +112,8 @@ jobs:
 
   smoke:
     if: inputs.smoke
-    runs-on: macos-latest
+    # AppIntents.swift needs the iOS 27 SDK, which macos-latest lacks.
+    runs-on: ${{ inputs.xcode == '26' && 'macos-latest' || format('xcode-{0}', inputs.xcode) }}
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v7
@@ -199,7 +202,8 @@ jobs:
 
   unsigned-ipa:
     if: inputs.unsigned_ipa
-    runs-on: macos-latest
+    # AppIntents.swift needs the iOS 27 SDK, which macos-latest lacks.
+    runs-on: ${{ inputs.xcode == '26' && 'macos-latest' || format('xcode-{0}', inputs.xcode) }}
     timeout-minutes: 150
     steps:
       - uses: actions/checkout@v7
@@ -270,7 +274,8 @@ jobs:
 
   testflight:
     if: inputs.testflight
-    runs-on: macos-latest
+    # AppIntents.swift needs the iOS 27 SDK, which macos-latest lacks.
+    runs-on: ${{ inputs.xcode == '26' && 'macos-latest' || format('xcode-{0}', inputs.xcode) }}
     timeout-minutes: 150
     concurrency:
       group: fork-ios-testflight
