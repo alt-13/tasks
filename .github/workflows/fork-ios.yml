@@ -88,7 +88,12 @@ jobs:
           xcodebuild -version
 
       - name: Boot a simulator
-        run: xcrun simctl boot "$(xcrun simctl list devices available -j | jq -r '[.devices[][] | select(.name | test("^iPhone [0-9]+$"))] | last | .udid')"
+        run: |
+          # Only the runtime matching the selected Xcode's SDK is a valid xcodebuild destination.
+          RUNTIME="iOS-$(xcrun --sdk iphonesimulator --show-sdk-version | tr . -)"
+          UDID="$(xcrun simctl list devices available -j | jq -r --arg rt "$RUNTIME" '[.devices | to_entries[] | select(.key | endswith($rt)) | .value[] | select(.name | test("^iPhone [0-9]+$"))] | last | .udid // empty')"
+          if [ -z "$UDID" ]; then echo "::error::No iPhone simulator for runtime $RUNTIME"; xcrun simctl list runtimes; exit 1; fi
+          xcrun simctl boot "$UDID"
 
       - name: Build for iOS and run simulator tests
         run: ./gradlew :composeApp:compileKotlinIosArm64 :data:iosSimulatorArm64Test :kmp:iosSimulatorArm64Test :composeApp:iosSimulatorArm64Test
@@ -147,7 +152,10 @@ jobs:
 
       - name: Boot a simulator
         run: |
-          UDID="$(xcrun simctl list devices available -j | jq -r '[.devices[][] | select(.name | test("^iPhone [0-9]+$"))] | last | .udid')"
+          # Only the runtime matching the selected Xcode's SDK is a valid xcodebuild destination.
+          RUNTIME="iOS-$(xcrun --sdk iphonesimulator --show-sdk-version | tr . -)"
+          UDID="$(xcrun simctl list devices available -j | jq -r --arg rt "$RUNTIME" '[.devices | to_entries[] | select(.key | endswith($rt)) | .value[] | select(.name | test("^iPhone [0-9]+$"))] | last | .udid // empty')"
+          if [ -z "$UDID" ]; then echo "::error::No iPhone simulator for runtime $RUNTIME"; xcrun simctl list runtimes; exit 1; fi
           xcrun simctl boot "$UDID"
           echo "UDID=$UDID" >> "$GITHUB_ENV"
 
