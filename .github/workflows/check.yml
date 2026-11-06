@@ -90,6 +90,49 @@ jobs:
             kmp/build/reports/**
             composeApp/build/reports/**
 
+  iosBuild:
+    # AppIntents.swift needs the iOS 27 SDK. Move to macos-latest once it ships Xcode 27.
+    runs-on: xcode-27
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/setup-gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: platform-tools
+
+      - name: Cache Kotlin/Native
+        uses: actions/cache@v6
+        with:
+          path: ~/.konan
+          key: konan-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}
+
+      - name: Find a simulator
+        run: |
+          xcodebuild -version
+          # Newest iPhone on a runtime not newer than the SDK; newer runtimes aren't valid destinations.
+          SDK="$(xcrun --sdk iphonesimulator --show-sdk-version)"
+          UDID="$(xcrun simctl list devices available -j | python3 -c '
+          import json, re, sys
+          sdk = tuple(int(x) for x in sys.argv[1].split(".")[:2])
+          best = None
+          for runtime, devices in json.load(sys.stdin)["devices"].items():
+              m = re.search(r"iOS-(\d+)-(\d+)", runtime)
+              if not m or (version := (int(m[1]), int(m[2]))) > sdk:
+                  continue
+              for device in devices:
+                  if re.fullmatch(r"iPhone \d+", device["name"]) and (best is None or version >= best[0]):
+                      best = (version, device["udid"])
+          print(best[1] if best else "")
+          ' "$SDK")"
+          if [ -z "$UDID" ]; then echo "::error::No iPhone simulator for SDK $SDK"; xcrun simctl list devices available; exit 1; fi
+          echo "UDID=$UDID" >> "$GITHUB_ENV"
+
+      - name: Build the app for the simulator
+        run: xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Debug -destination "id=$UDID" CODE_SIGNING_ALLOWED=NO build
+
   instrumentedTest:
     runs-on: ubuntu-latest
     strategy:
