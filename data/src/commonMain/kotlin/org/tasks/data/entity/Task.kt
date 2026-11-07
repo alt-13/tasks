@@ -47,13 +47,18 @@ data class Task @OptIn(ExperimentalSerializationApi::class) constructor(
     var dueDate: Long = 0L,
     @ColumnInfo(name = "hideUntil")
     var hideUntil: Long = 0L,
+    // @JsonNames: backups from before May 2020 use the old Java field names
     @ColumnInfo(name = "created")
+    @JsonNames("created")
     var creationDate: Long = 0L,
     @ColumnInfo(name = "modified")
+    @JsonNames("modified")
     var modificationDate: Long = 0L,
     @ColumnInfo(name = "completed")
+    @JsonNames("completed")
     var completionDate: Long = 0L,
     @ColumnInfo(name = "deleted")
+    @JsonNames("deleted")
     var deletionDate: Long = 0L,
     @Redacted
     @ColumnInfo(name = "notes")
@@ -66,9 +71,10 @@ data class Task @OptIn(ExperimentalSerializationApi::class) constructor(
     var timerStart: Long = 0L,
     @ColumnInfo(name = "notificationFlags")
     @SerialName("ringFlags")
-    @JsonNames("reminderFlags")
+    @JsonNames("reminderFlags", "notificationFlags")
     var ringFlags: Int = 0,
     @ColumnInfo(name = "lastNotified")
+    @JsonNames("lastNotified")
     var reminderLast: Long = 0L,
     @ColumnInfo(name = "reminderDismissed", defaultValue = "0")
     var reminderDismissed: Long = 0L,
@@ -77,10 +83,12 @@ data class Task @OptIn(ExperimentalSerializationApi::class) constructor(
     @ColumnInfo(name = "repeat_from", defaultValue = RepeatFrom.DUE_DATE.toString())
     var repeatFrom: Int = RepeatFrom.DUE_DATE,
     @ColumnInfo(name = "calendarUri")
+    @JsonNames("calendarUri")
     var calendarURI: String? = null,
     @ColumnInfo(name = "remoteId")
     var remoteId: String? = UUIDHelper.newUUID(),
     @ColumnInfo(name = "collapsed")
+    @JsonNames("collapsed")
     var isCollapsed: Boolean = false,
     @ColumnInfo(name = "parent")
     @Transient
