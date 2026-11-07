@@ -68,6 +68,7 @@ import org.tasks.extensions.jsonString
 import org.tasks.filters.FilterCriteriaProvider
 import org.tasks.preferences.Preferences
 import timber.log.Timber
+import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import javax.inject.Inject
@@ -531,7 +532,15 @@ class TasksJsonImporter @Inject constructor(
             )
         }
         backup.attachments
-            ?.mapNotNull { taskAttachmentDao.getAttachment(it.attachmentUid) }
+            ?.mapNotNull { attachment ->
+                attachment.legacyFile()
+                    ?.let { if (version < V6_4) it.copy(uri = Uri.fromFile(File(it.uri)).toString()) else it }
+                    ?.also { if (taskAttachmentDao.getAttachment(it.remoteId) == null) taskAttachmentDao.insert(it) }
+                    ?.remoteId
+                    ?: attachment.attachmentUid
+            }
+            ?.distinct()
+            ?.mapNotNull { taskAttachmentDao.getAttachment(it) }
             ?.map {
                 Attachment(
                     task = taskId,
