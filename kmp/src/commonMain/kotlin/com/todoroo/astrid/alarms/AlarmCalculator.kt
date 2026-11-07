@@ -56,6 +56,41 @@ class AlarmCalculator(
         }
     }
 
+    /**
+     * Every reminder [alarms] will raise for [task] after [now], at most [limit] per alarm.
+     * A pending snooze replaces the others, as in [AlarmService.alarmsDueBefore].
+     */
+    fun upcoming(
+        task: Task,
+        alarms: List<Alarm>,
+        defaultDueTime: Int,
+        now: Long,
+        limit: Int,
+    ): List<Notification> {
+        // with reminderLast at now, a repeating alarm starts from its next repeat
+        val fromNow = task.copy(reminderLast = maxOf(task.reminderLast, now))
+        val entries = alarms
+            .flatMap { alarm ->
+                when (alarm.type) {
+                    // a random reminder counts from the last one, so it needs the real reminderLast
+                    Alarm.TYPE_RANDOM, Alarm.TYPE_SNOOZE ->
+                        listOfNotNull(toAlarmEntry(task, alarm, defaultDueTime))
+                    else ->
+                        generateSequence(toAlarmEntry(fromNow, alarm, defaultDueTime)) {
+                            toAlarmEntry(task.copy(reminderLast = it.timestamp), alarm, defaultDueTime)
+                        }
+                            .take(limit)
+                            .toList()
+                }
+            }
+            .filter { it.timestamp > now }
+        return entries
+            .filter { it.type == Alarm.TYPE_SNOOZE }
+            .maxByOrNull { it.timestamp }
+            ?.let { listOf(it) }
+            ?: entries
+    }
+
     private fun calculateNextRandomReminder(random: Random, task: Task, reminderPeriod: Long) =
         if (reminderPeriod > 0) {
             val baseline = when {
