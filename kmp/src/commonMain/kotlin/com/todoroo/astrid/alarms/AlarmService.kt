@@ -126,6 +126,18 @@ class AlarmService(
             ?: NO_ALARM
     }
 
+    suspend fun upcomingAlarms(now: Long, limit: Int): List<Notification> {
+        val defaultDueTime = preferences.defaultDueTime()
+        val byTask = alarmDao.getActiveAlarms().groupBy { it.task }
+        val tasks = taskDao.fetch(byTask.keys.toList()).associateBy { it.id }
+        return byTask
+            .flatMap { (taskId, alarms) ->
+                val task = tasks[taskId] ?: return@flatMap emptyList()
+                alarmCalculator.upcoming(task, alarms, defaultDueTime, now, limit)
+            }
+            .map { it.copy(timestamp = preferences.adjustForQuietHours(it.timestamp)) }
+    }
+
     internal suspend fun alarmsDueBefore(
         cutoff: Long,
     ): Pair<List<Notification>, List<Notification>> {

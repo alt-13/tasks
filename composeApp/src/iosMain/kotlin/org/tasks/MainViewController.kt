@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.window.ComposeUIViewController
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -21,6 +22,7 @@ import org.tasks.di.coreModule
 import org.tasks.di.platformModule
 import org.tasks.extensions.requestNotificationPermissionIfNeeded
 import org.tasks.logging.setupLogging
+import org.tasks.notifications.IosNotifier
 import org.tasks.preferences.AppPreferences
 import org.tasks.preferences.recordInstallIfNeeded
 import org.tasks.service.Upgrader
@@ -61,6 +63,7 @@ private fun syncWhenForegrounded() {
     val koin = KoinPlatform.getKoin()
     val syncAdapters = koin.get<SyncAdapters>()
     val sseClient = koin.get<SseClient>()
+    val notifier = koin.get<IosNotifier>()
     NSNotificationCenter.defaultCenter.addObserverForName(
         name = UIApplicationDidBecomeActiveNotification,
         `object` = null,
@@ -68,6 +71,8 @@ private fun syncWhenForegrounded() {
     ) {
         sseClient.start()
         syncAdapters.sync(SyncSource.APP_RESUME)
+        // rolls the window forward, does nothing unless MainViewController started it
+        notifier.triggerNotifications()
     }
     NSNotificationCenter.defaultCenter.addObserverForName(
         name = UIApplicationDidEnterBackgroundNotification,
@@ -87,14 +92,19 @@ fun MainViewController() = ComposeUIViewController {
     val platformConfig = koinInject<PlatformConfiguration>()
     val refreshBroadcaster = koinInject<ComposeRefreshBroadcaster>()
     val alarmDao = koinInject<AlarmDao>()
+    val notifier = koinInject<IosNotifier>()
     LaunchedEffect(Unit) {
         if (!platformConfig.supportsNotifications) {
             return@LaunchedEffect
         }
-        // a saved or synced reminder broadcasts a refresh
+        launch(Dispatchers.Default) { notifier.run() }
+        // a saved, deleted or synced task broadcasts a refresh
         refreshBroadcaster.refreshes
             .onStart { emit(Unit) }
-            .collect { requestNotificationPermissionIfNeeded(alarmDao) }
+            .collect {
+                requestNotificationPermissionIfNeeded(alarmDao)
+                notifier.triggerNotifications()
+            }
     }
     App(
         openUrl = { url ->

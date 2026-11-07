@@ -1,6 +1,7 @@
 package org.tasks.di
 
 import androidx.room3.Room
+import com.todoroo.astrid.alarms.AlarmService
 import com.todoroo.astrid.service.CommonUpgrades
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -53,6 +54,7 @@ import org.tasks.logging.IosLogExporter
 import org.tasks.logging.LogExporter
 import org.tasks.logging.fileLogWriter
 import org.tasks.notifications.CancelReason
+import org.tasks.notifications.IosNotifier
 import org.tasks.notifications.Notifier
 import org.tasks.preferences.TasksPreferences
 import org.tasks.security.Encryption
@@ -163,16 +165,23 @@ actual fun platformModule(): Module = module {
             }
         }
     }
-    factory<Notifier> {
-        object : Notifier {
-            override suspend fun cancel(id: Long, reason: CancelReason) {}
-            override suspend fun cancel(ids: List<Long>, reason: CancelReason) {}
-            override suspend fun cancelAll(reason: CancelReason) {}
-            override fun triggerNotifications() {}
-            override suspend fun updateTimerNotification() {}
+    single {
+        IosNotifier(
+            alarmService = { get<AlarmService>() },
+            taskDao = get(),
+            notificationsEnabled = {
+                get<TasksPreferences>().get(TasksPreferences.notificationsEnabled, true)
+            },
+        )
+    }
+    factory<Notifier> { get<IosNotifier>() }
+    factory<TaskCleanup> {
+        val notifier = get<IosNotifier>()
+        object : TaskCleanup {
+            override suspend fun cleanup(tasks: List<Long>) =
+                notifier.cancel(tasks, CancelReason.CLEANUP)
         }
     }
-    factory<TaskCleanup> { object : TaskCleanup {} }
     single { get<Database>().apiDao() }
     single { ApiQueryEngine(get()) }
     single<ApiTaskFactory> {
