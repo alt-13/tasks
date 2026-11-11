@@ -1,5 +1,6 @@
 import UIKit
 import UserNotifications
+import BackgroundTasks
 import FirebaseCore
 import ComposeApp
 
@@ -14,6 +15,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         application.registerForRemoteNotifications()
         // must be set before launch finishes, or a tap that launched the app is lost
         UNUserNotificationCenter.current().delegate = self
+        registerBackgroundRefresh()
         return true
     }
 
@@ -36,6 +38,17 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
             actionIdentifier: response.actionIdentifier,
             completion: completionHandler
         )
+    }
+
+    // Must run before launch finishes. Main queue, like the APNs callbacks, since Kotlin startup touches UIKit.
+    private func registerBackgroundRefresh() {
+        guard let identifier = BackgroundRefreshKt.backgroundRefreshTaskId else { return }
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: identifier, using: .main) { task in
+            let cancel = BackgroundRefreshKt.onBackgroundRefresh { finished in
+                task.setTaskCompleted(success: finished.boolValue)
+            }
+            task.expirationHandler = { cancel() }
+        }
     }
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
