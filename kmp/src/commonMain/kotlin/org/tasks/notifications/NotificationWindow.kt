@@ -32,4 +32,16 @@ object NotificationWindow {
         val keep = window.map { identifier(it) }.toSet()
         return pending.filter { taskId(it) != null && it !in keep }
     }
+
+    // requests from the last reconcile that are no longer pending: the platform has shown them
+    fun fired(scheduled: Collection<String>, pending: Collection<String>): List<Notification> {
+        val waiting = pending.toSet()
+        return scheduled
+            .filter { it !in waiting }
+            .mapNotNull { identifier ->
+                val taskId = taskId(identifier) ?: return@mapNotNull null
+                val timestamp = identifier.substringAfterLast('.').toLongOrNull() ?: return@mapNotNull null
+                Notification(taskId = taskId, timestamp = timestamp)
+            }
+    }
 }

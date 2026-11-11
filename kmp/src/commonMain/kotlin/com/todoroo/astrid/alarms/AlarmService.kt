@@ -21,6 +21,7 @@ import org.tasks.notifications.Notifier
 import org.tasks.preferences.AppPreferences
 import org.tasks.time.DateTimeUtils2.currentTimeMillis
 import org.tasks.time.ONE_MINUTE
+import org.tasks.time.endOfMinute
 import org.tasks.time.startOfMinute
 
 class AlarmService(
@@ -136,6 +137,25 @@ class AlarmService(
                 alarmCalculator.upcoming(task, alarms, defaultDueTime, now, limit)
             }
             .map { it.copy(timestamp = preferences.adjustForQuietHours(it.timestamp)) }
+    }
+
+    /**
+     * Records reminders the platform showed on its own while the app wasn't running, as
+     * [triggerAlarms] does for the ones it posts: the task's last reminder moves up to the
+     * latest one shown, and snoozes due by then are spent.
+     */
+    suspend fun recordFired(fired: List<Notification>) {
+        val latest = fired.groupBy { it.taskId }.mapValues { (_, entries) -> entries.maxOf { it.timestamp } }
+        val tasks = taskDao.fetch(latest.keys.toList()).associateBy { it.id }
+        latest.forEach { (taskId, timestamp) ->
+            val task = tasks[taskId] ?: return@forEach
+            if (timestamp.endOfMinute() > task.reminderLast) {
+                taskDao.setLastNotified(taskId, timestamp.endOfMinute())
+            }
+            alarmDao.getSnoozed(listOf(taskId), timestamp + 1)
+                .takeIf { it.isNotEmpty() }
+                ?.let { snoozed -> alarmDao.deleteByIds(snoozed.map { it.id }) }
+        }
     }
 
     internal suspend fun alarmsDueBefore(

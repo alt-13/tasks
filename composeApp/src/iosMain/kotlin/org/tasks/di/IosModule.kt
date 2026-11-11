@@ -172,6 +172,7 @@ actual fun platformModule(): Module = module {
             notificationsEnabled = {
                 get<TasksPreferences>().get(TasksPreferences.notificationsEnabled, true)
             },
+            preferences = get(),
         )
     }
     factory<Notifier> { get<IosNotifier>() }

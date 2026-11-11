@@ -9,11 +9,14 @@ import org.tasks.data.entity.Notification
 import org.tasks.data.entity.Task
 import org.tasks.extensions.guarded
 import org.tasks.extensions.notificationPermission
+import org.tasks.preferences.TasksPreferences
 import org.tasks.time.DateTimeUtils2.currentTimeMillis
+import org.tasks.time.endOfMinute
 import platform.UserNotifications.UNMutableNotificationContent
 import platform.UserNotifications.UNNotification
 import platform.UserNotifications.UNNotificationRequest
 import platform.UserNotifications.UNNotificationSound
+import platform.UserNotifications.UNNotificationTrigger
 import platform.UserNotifications.UNTimeIntervalNotificationTrigger
 import platform.UserNotifications.UNUserNotificationCenter
 import kotlin.coroutines.resume
@@ -28,6 +31,7 @@ internal class IosNotifier(
     private val alarmService: () -> AlarmService,
     private val taskDao: TaskDao,
     private val notificationsEnabled: suspend () -> Boolean,
+    private val preferences: TasksPreferences,
 ) : Notifier {
     private val reconciles = Channel<Unit>(Channel.CONFLATED)
 
@@ -40,35 +44,65 @@ internal class IosNotifier(
     }
 
     private suspend fun reconcile() {
+        val pending = identifiers(pending = true)
+        val fired = NotificationWindow.fired(
+            scheduled = preferences.get(TasksPreferences.scheduledNotifications, emptySet()),
+            pending = pending,
+        )
+        alarmService().recordFired(fired)
         val now = currentTimeMillis()
-        val window = if (
-            notificationsEnabled() &&
-            notificationPermission() == NotificationPermission.GRANTED
-        ) {
+        val allowed = notificationsEnabled() &&
+                notificationPermission() == NotificationPermission.GRANTED
+        // due but never handed to iOS: created overdue, or due beyond the last window
+        val posted = mutableListOf<Long>()
+        if (allowed) {
+            alarmService().triggerAlarms { overdue -> post(overdue).also { posted.addAll(it) } }
+        }
+        val window = if (allowed) {
             NotificationWindow.window(alarmService().upcomingAlarms(now, NotificationWindow.SIZE), now)
         } else {
             emptyList()
         }
-        val stale = NotificationWindow.stale(identifiers(pending = true), window)
+        val stale = NotificationWindow.stale(pending, window)
         if (stale.isNotEmpty()) {
             center.removePendingNotificationRequestsWithIdentifiers(stale)
         }
         val tasks = taskDao.fetch(window.map { it.taskId }.distinct()).associateBy { it.id }
         // adding an identifier again replaces its request, so edited titles stay current
-        window.forEach { entry -> tasks[entry.taskId]?.let { schedule(it, entry, now) } }
-        Logger.d(tag = TAG) { "Scheduled ${window.size}, removed ${stale.size}" }
+        val scheduled = window.filter { it.taskId in tasks }
+        scheduled.forEach { schedule(tasks.getValue(it.taskId), it, timeInterval(it, now)) }
+        preferences.set(
+            TasksPreferences.scheduledNotifications,
+            scheduled.map { NotificationWindow.identifier(it) }.toSet(),
+        )
+        Logger.d(tag = TAG) {
+            "Recorded ${fired.size}, posted $posted, scheduled ${scheduled.size}, removed ${stale.size}"
+        }
     }
 
-    private fun schedule(task: Task, entry: Notification, now: Long) {
+    private suspend fun post(overdue: List<Notification>): List<Long> {
+        val tasks = taskDao.fetch(overdue.map { it.taskId }).associateBy { it.id }
+        return overdue.mapNotNull { entry ->
+            val task = tasks[entry.taskId] ?: return@mapNotNull null
+            schedule(task, entry, trigger = null)
+            taskDao.setLastNotified(entry.taskId, entry.timestamp.endOfMinute())
+            entry.taskId
+        }
+    }
+
+    private fun timeInterval(entry: Notification, now: Long) =
+        UNTimeIntervalNotificationTrigger.triggerWithTimeInterval(
+            ((entry.timestamp - now) / 1000.0).coerceAtLeast(1.0),
+            false,
+        )
+
+    // a null trigger shows the notification right away
+    private fun schedule(task: Task, entry: Notification, trigger: UNNotificationTrigger?) {
         val content = UNMutableNotificationContent().apply {
             setTitle(task.title?.takeIf { it.isNotBlank() } ?: "Tasks.org")
             task.notes?.takeIf { it.isNotBlank() }?.let { setBody(it) }
             setSound(UNNotificationSound.defaultSound)
         }
-        val trigger = UNTimeIntervalNotificationTrigger.triggerWithTimeInterval(
-            ((entry.timestamp - now) / 1000.0).coerceAtLeast(1.0),
-            false,
-        )
         val request = UNNotificationRequest.requestWithIdentifier(
             NotificationWindow.identifier(entry),
             content,

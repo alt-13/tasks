@@ -64,6 +64,23 @@ class NotificationWindowTest {
     }
 
     @Test
+    fun scheduledRequestsNoLongerPendingHaveFired() {
+        val fired = entry(taskId = 1, at = now - MINUTE)
+        val waiting = entry(taskId = 2, at = now + MINUTE)
+        val scheduled = listOf(fired, waiting).map { NotificationWindow.identifier(it) }
+        val pending = listOf(NotificationWindow.identifier(waiting), "someone-else")
+
+        assertEquals(listOf(fired), NotificationWindow.fired(scheduled, pending))
+    }
+
+    @Test
+    fun nothingHasFiredWithoutAPreviousReconcile() {
+        val pending = listOf(NotificationWindow.identifier(entry(taskId = 1, at = now)))
+
+        assertEquals(emptyList(), NotificationWindow.fired(emptySet(), pending))
+    }
+
+    @Test
     fun aRepeatingAlarmIsScheduledFromItsNextRepeat() {
         val alarm = Alarm(task = 1, time = now - 30 * MINUTE, type = TYPE_DATE_TIME, repeat = 5, interval = 20 * MINUTE)
 

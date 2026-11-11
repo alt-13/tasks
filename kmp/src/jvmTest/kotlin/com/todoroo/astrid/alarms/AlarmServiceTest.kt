@@ -17,12 +17,14 @@ import org.tasks.DatabaseTest
 import org.tasks.broadcast.RefreshBroadcaster
 import org.tasks.preferences.AppPreferences
 import org.tasks.data.entity.Alarm
+import org.tasks.data.entity.Alarm.Companion.TYPE_DATE_TIME
 import org.tasks.data.entity.Alarm.Companion.TYPE_REL_END
 import org.tasks.data.entity.Alarm.Companion.TYPE_SNOOZE
 import org.tasks.data.entity.CaldavAccount
 import org.tasks.data.entity.CaldavAccount.Companion.TYPE_CALDAV
 import org.tasks.data.entity.CaldavCalendar
 import org.tasks.data.entity.CaldavTask
+import org.tasks.data.entity.Notification
 import org.tasks.data.entity.Task
 import org.tasks.notifications.CancelReason
 import org.tasks.notifications.Notifier
@@ -30,6 +32,7 @@ import org.tasks.reminders.Random
 import org.tasks.time.DateTimeUtils2
 import org.tasks.time.DateTimeUtils2.currentTimeMillis
 import org.tasks.time.ONE_MINUTE
+import org.tasks.time.endOfMinute
 import org.tasks.time.startOfMinute
 import java.util.concurrent.TimeUnit
 
@@ -293,6 +296,46 @@ class AlarmServiceTest : DatabaseTest() {
         alarmService.snooze(currentTimeMillis() + ONE_HOUR, listOf(task.id))
 
         assertEquals(1000L, taskDao.fetch(task.id)!!.modificationDate)
+    }
+
+    @Test
+    fun aReminderThePlatformShowedIsNotPostedAgain() = runTest(testDispatcher) {
+        val shown = createTask()
+        val missed = createTask()
+        val at = currentTimeMillis() - ONE_HOUR
+        alarmDao.insert(Alarm(task = shown.id, time = at, type = TYPE_DATE_TIME))
+        alarmDao.insert(Alarm(task = missed.id, time = at, type = TYPE_DATE_TIME))
+
+        alarmService.recordFired(listOf(Notification(taskId = shown.id, timestamp = at)))
+
+        val posted = mutableListOf<Long>()
+        alarmService.triggerAlarms { entries -> entries.map { it.taskId }.also { posted.addAll(it) } }
+        assertEquals(listOf(missed.id), posted)
+        assertEquals(at.endOfMinute(), taskDao.fetch(shown.id)!!.reminderLast)
+    }
+
+    @Test
+    fun recordingAnOlderReminderKeepsTheLaterOne() = runTest(testDispatcher) {
+        val task = createTask()
+        val later = currentTimeMillis().endOfMinute()
+        taskDao.setLastNotified(task.id, later)
+
+        alarmService.recordFired(listOf(Notification(taskId = task.id, timestamp = later - ONE_HOUR)))
+
+        assertEquals(later, taskDao.fetch(task.id)!!.reminderLast)
+    }
+
+    @Test
+    fun aShownSnoozeIsSpentAndALaterOneKept() = runTest(testDispatcher) {
+        val task = createTask()
+        val shownAt = currentTimeMillis() - ONE_HOUR
+        val later = currentTimeMillis() - ONE_MINUTE
+        alarmDao.insert(Alarm(task = task.id, time = shownAt, type = TYPE_SNOOZE))
+        alarmDao.insert(Alarm(task = task.id, time = later, type = TYPE_SNOOZE))
+
+        alarmService.recordFired(listOf(Notification(taskId = task.id, timestamp = shownAt)))
+
+        assertEquals(listOf(later), alarmDao.getAlarms(task.id).map { it.time })
     }
 
     @After
