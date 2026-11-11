@@ -23,12 +23,12 @@ val backgroundRefreshTaskId: String?
  */
 fun onBackgroundRefresh(completion: (Boolean) -> Unit): () -> Unit {
     ensureStarted()
-    Logger.i(TAG) { "background refresh started" }
+    Logger.i(tag = TAG) { "background refresh started" }
     val koin = KoinPlatform.getKoin()
     val job = koin.get<CoroutineScope>().launchBackgroundSync(
         onError = { koin.get<Reporting>().reportException(it) },
         completion = { finished ->
-            Logger.d(TAG) { "background refresh ${if (finished) "finished" else "failed or expired"}" }
+            Logger.d(tag = TAG) { "background refresh ${if (finished) "finished" else "failed or expired"}" }
             completion(finished)
         },
     ) {
