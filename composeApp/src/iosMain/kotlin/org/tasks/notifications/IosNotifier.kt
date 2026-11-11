@@ -4,6 +4,8 @@ import co.touchlab.kermit.Logger
 import com.todoroo.astrid.alarms.AlarmService
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.tasks.data.dao.TaskDao
 import org.tasks.data.entity.Notification
 import org.tasks.data.entity.Task
@@ -37,10 +39,17 @@ internal class IosNotifier(
 
     private val center get() = UNUserNotificationCenter.currentNotificationCenter()
 
+    private val reconciling = Mutex()
+
     suspend fun run() {
         for (unit in reconciles) {
-            guarded(TAG, "Failed to schedule reminders", Unit) { reconcile() }
+            reconcileNow()
         }
+    }
+
+    // also called on its own when iOS runs a notification action with the app in the background
+    suspend fun reconcileNow() {
+        guarded(TAG, "Failed to schedule reminders", Unit) { reconciling.withLock { reconcile() } }
     }
 
     private suspend fun reconcile() {
@@ -102,6 +111,7 @@ internal class IosNotifier(
             setTitle(task.title?.takeIf { it.isNotBlank() } ?: "Tasks.org")
             task.notes?.takeIf { it.isNotBlank() }?.let { setBody(it) }
             setSound(UNNotificationSound.defaultSound)
+            setCategoryIdentifier(if (task.readOnly) CATEGORY_SNOOZE_ONLY else CATEGORY_ACTIONABLE)
         }
         val request = UNNotificationRequest.requestWithIdentifier(
             NotificationWindow.identifier(entry),

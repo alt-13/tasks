@@ -20,9 +20,11 @@ import org.tasks.caldav.CaldavClient
 import org.tasks.data.dao.AlarmDao
 import org.tasks.di.coreModule
 import org.tasks.di.platformModule
+import org.tasks.extensions.guarded
 import org.tasks.extensions.requestNotificationPermissionIfNeeded
 import org.tasks.logging.setupLogging
 import org.tasks.notifications.IosNotifier
+import org.tasks.notifications.registerNotificationCategories
 import org.tasks.preferences.AppPreferences
 import org.tasks.preferences.recordInstallIfNeeded
 import org.tasks.service.Upgrader
@@ -97,7 +99,12 @@ fun MainViewController() = ComposeUIViewController {
         if (!platformConfig.supportsNotifications) {
             return@LaunchedEffect
         }
-        launch(Dispatchers.Default) { notifier.run() }
+        launch(Dispatchers.Default) {
+            guarded("MainViewController", "Failed to register notification actions", Unit) {
+                registerNotificationCategories()
+            }
+            notifier.run()
+        }
         // a saved, deleted or synced task broadcasts a refresh
         refreshBroadcaster.refreshes
             .onStart { emit(Unit) }

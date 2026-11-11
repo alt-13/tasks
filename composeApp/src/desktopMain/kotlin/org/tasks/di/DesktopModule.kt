@@ -66,6 +66,7 @@ import org.tasks.notifications.NucleusWindowsNotifications
 import org.tasks.notifications.notificationSessionToken
 import org.tasks.opentasks.OpenTasksSyncer
 import org.tasks.preferences.TasksPreferences
+import org.tasks.requestForeground
 import org.tasks.security.DesktopKeyProvider
 import org.tasks.security.KeyStoreEncryption
 import org.tasks.service.DesktopCleanup
@@ -418,6 +419,7 @@ actual fun platformModule(): Module = module {
             taskCompleter = get(),
             notifier = { get<Notifier>() },
             taskRequests = get(),
+            requestForeground = ::requestForeground,
         )
     }
     single {

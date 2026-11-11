@@ -55,6 +55,7 @@ import org.tasks.logging.LogExporter
 import org.tasks.logging.fileLogWriter
 import org.tasks.notifications.CancelReason
 import org.tasks.notifications.IosNotifier
+import org.tasks.notifications.NotificationActionHandler
 import org.tasks.notifications.Notifier
 import org.tasks.preferences.TasksPreferences
 import org.tasks.security.Encryption
@@ -176,6 +177,18 @@ actual fun platformModule(): Module = module {
         )
     }
     factory<Notifier> { get<IosNotifier>() }
+    single {
+        NotificationActionHandler(
+            scope = get(),
+            taskDao = get(),
+            alarmService = { get<AlarmService>() },
+            taskCompleter = get(),
+            notifier = { get<Notifier>() },
+            taskRequests = get(),
+            // iOS brings the app forward itself for a tap and for Snooze
+            requestForeground = {},
+        )
+    }
     factory<TaskCleanup> {
         val notifier = get<IosNotifier>()
         object : TaskCleanup {

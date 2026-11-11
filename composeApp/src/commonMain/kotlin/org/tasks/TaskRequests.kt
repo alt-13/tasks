@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -46,11 +47,16 @@ class TaskRequests {
         return withTimeoutOrNull(OPEN_TIMEOUT_MS) { opened.await() } ?: false
     }
 
+    // a notification tap can launch the app before App starts collecting open requests
+    suspend fun awaitOpenRequests(timeoutMs: Long = AWAIT_TIMEOUT_MS): Boolean =
+        withTimeoutOrNull(timeoutMs) { _openRequests.subscriptionCount.first { it > 0 } } != null
+
     fun snooze(taskId: Long) {
         _snoozeRequests.trySend(taskId)
     }
 
     companion object {
         private const val OPEN_TIMEOUT_MS = 5_000L
+        private const val AWAIT_TIMEOUT_MS = 30_000L
     }
 }

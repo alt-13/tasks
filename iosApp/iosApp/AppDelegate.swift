@@ -1,8 +1,9 @@
 import UIKit
+import UserNotifications
 import FirebaseCore
 import ComposeApp
 
-final class AppDelegate: NSObject, UIApplicationDelegate {
+final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
@@ -11,7 +12,30 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         CrashlyticsKt.installCrashlytics()
         AnalyticsBridgeKt.installAnalytics(analytics: PostHogBridge())
         application.registerForRemoteNotifications()
+        // must be set before launch finishes, or a tap that launched the app is lost
+        UNUserNotificationCenter.current().delegate = self
         return true
+    }
+
+    // without this, iOS doesn't show reminders while the app is in the foreground
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .sound, .list])
+    }
+
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        NotificationResponsesKt.onNotificationResponse(
+            identifier: response.notification.request.identifier,
+            actionIdentifier: response.actionIdentifier,
+            completion: completionHandler
+        )
     }
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {

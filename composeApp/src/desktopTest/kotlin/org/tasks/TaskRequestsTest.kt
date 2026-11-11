@@ -112,6 +112,22 @@ class TaskRequestsTest {
         assertTrue(accepted.await())
     }
 
+    @Test
+    fun awaitOpenRequestsReturnsOnceTheAppStartsListening() = runTest(StandardTestDispatcher()) {
+        val ready = async { requests.awaitOpenRequests(timeoutMs = 1_000) }
+        runCurrent()
+        assertTrue(ready.isActive)
+
+        collectOneOpenRequest(answer = true)
+
+        assertTrue(ready.await())
+    }
+
+    @Test
+    fun awaitOpenRequestsGivesUpWhenNobodyListens() = runTest(StandardTestDispatcher()) {
+        assertFalse(requests.awaitOpenRequests(timeoutMs = 1_000))
+    }
+
     private fun TestScope.collectOneOpenRequest(answer: Boolean) =
         backgroundScope.async { requests.openRequests.first().also { it.complete(answer) } }
             .also { runCurrent() }

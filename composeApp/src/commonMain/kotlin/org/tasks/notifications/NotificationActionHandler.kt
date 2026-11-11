@@ -8,7 +8,6 @@ import org.tasks.TaskEditDestination
 import org.tasks.TaskRequests
 import org.tasks.data.dao.TaskDao
 import org.tasks.extensions.guarded
-import org.tasks.requestForeground
 import org.tasks.service.TaskCompleter
 
 private const val TAG = "NotificationActions"
@@ -21,18 +20,20 @@ class NotificationActionHandler(
     private val notifier: () -> Notifier,
     private val taskRequests: TaskRequests,
 
-    private val requestForeground: () -> Unit = ::requestForeground,
+    private val requestForeground: () -> Unit,
 ) : NotificationActionListener {
     override fun onAction(taskId: Long, action: NotificationAction) {
         Logger.d(tag = TAG) { "$action on $taskId" }
-        scope.launch {
-            guarded(TAG, "Failed to handle $action on $taskId", Unit) {
-                when (action) {
-                    NotificationAction.OPEN -> open(taskId)
+        scope.launch { handle(taskId, action) }
+    }
 
-                    NotificationAction.COMPLETE -> taskCompleter.setComplete(taskId)
-                    NotificationAction.SNOOZE -> snooze(taskId)
-                }
+    suspend fun handle(taskId: Long, action: NotificationAction) {
+        guarded(TAG, "Failed to handle $action on $taskId", Unit) {
+            when (action) {
+                NotificationAction.OPEN -> open(taskId)
+
+                NotificationAction.COMPLETE -> taskCompleter.setComplete(taskId)
+                NotificationAction.SNOOZE -> snooze(taskId)
             }
         }
     }
