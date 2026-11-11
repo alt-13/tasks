@@ -61,9 +61,9 @@ internal class IosNotifier(
 
     private fun schedule(task: Task, entry: Notification, now: Long) {
         val content = UNMutableNotificationContent().apply {
-            title = task.title?.takeIf { it.isNotBlank() } ?: "Tasks.org"
-            task.notes?.takeIf { it.isNotBlank() }?.let { body = it }
-            sound = UNNotificationSound.defaultSound
+            setTitle(task.title?.takeIf { it.isNotBlank() } ?: "Tasks.org")
+            task.notes?.takeIf { it.isNotBlank() }?.let { setBody(it) }
+            setSound(UNNotificationSound.defaultSound)
         }
         val trigger = UNTimeIntervalNotificationTrigger.triggerWithTimeInterval(
             ((entry.timestamp - now) / 1000.0).coerceAtLeast(1.0),
