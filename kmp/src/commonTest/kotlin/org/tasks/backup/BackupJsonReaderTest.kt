@@ -103,7 +103,7 @@ class BackupJsonReaderTest {
         assertEquals("""{"uri":"content://org.tasks/attachments/list.jpg"}""", first.comments!!.single().picture)
         assertTrue(""""lastSync": 1518472460000""" in backup.rawTasks.first())
         assertEquals(2, backup.tagData.single().color)
-        assertEquals("dueDate\t0\t\t0\nimportance\t1\t\t1", backup.filters.single().criterion)
+        assertEquals("active||Due today|3|\ndueDate|EOD()|Due By: ?|2|", backup.filters.single().criterion)
         assertEquals(7, backup.googleTaskLists.single().color)
         assertNull(backup.googleTaskLists.single().account)
     }

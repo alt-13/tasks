@@ -72,7 +72,7 @@ const val BACKUP_V491 = """
         "title": "Due today",
         "sql": "WHERE tasks.dueDate<=(strftime('%s','now','localtime','start of day','+1 day')*1000)",
         "values": "",
-        "criterion": "dueDate\t0\t\t0\nimportance\t1\t\t1"
+        "criterion": "active||Due today|3|\ndueDate|EOD()|Due By: ?|2|"
       }
     ],
     "googleTaskLists": [
