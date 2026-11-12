@@ -5,7 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import org.koin.mp.KoinPlatform
 import org.tasks.analytics.Reporting
 import org.tasks.ensureStarted
-import org.tasks.notifications.Notifier
+import org.tasks.notifications.IosNotifier
 import org.tasks.sync.SyncRunner
 import org.tasks.sync.SyncSource
 import org.tasks.sync.launchBackgroundSync
@@ -20,7 +20,8 @@ val backgroundRefreshTaskId: String?
 
 /**
  * Called from the BGAppRefreshTask launch handler. Returns a function for the task's expiration
- * handler that cancels the sync; [completion] is then called with false.
+ * handler that cancels the sync; [completion] is then called with false. A reminder reconcile
+ * that has already started finishes first.
  */
 fun onBackgroundRefresh(completion: (Boolean) -> Unit): () -> Unit {
     ensureStarted()
@@ -32,14 +33,11 @@ fun onBackgroundRefresh(completion: (Boolean) -> Unit): () -> Unit {
             Logger.d(tag = TAG) { "background refresh ${if (finished) "finished" else "failed or expired"}" }
             completion(finished)
         },
+        // a background launch has no UI, so no reconcile loop: roll the reminder window forward here
+        afterSync = { koin.get<IosNotifier>().reconcileNow() },
     ) {
         koin.get<IosBackgroundWork>().onRefreshStarted()
-        try {
-            koin.get<SyncRunner>().syncNow(SyncSource.BACKGROUND)
-        } finally {
-            // rolls the reminder window forward
-            koin.get<Notifier>().triggerNotifications()
-        }
+        koin.get<SyncRunner>().syncNow(SyncSource.BACKGROUND)
     }
     return { job.cancel() }
 }

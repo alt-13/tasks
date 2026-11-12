@@ -47,7 +47,7 @@ internal class IosNotifier(
         }
     }
 
-    // also called on its own when iOS runs a notification action with the app in the background
+    // also called on its own when iOS runs the app in the background without UI: a notification action or a background refresh
     suspend fun reconcileNow() {
         guarded(TAG, "Failed to schedule reminders", Unit) { reconciling.withLock { reconcile() } }
     }
