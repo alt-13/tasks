@@ -20,7 +20,7 @@ fun appGroupPath(groupId: String? = appGroupId): String =
         ?.let { NSFileManager.defaultManager.containerURLForSecurityApplicationGroupIdentifier(it)?.path }
         ?: documentsPath()
 
-internal fun documentsPath(): String {
+fun documentsPath(): String {
     val url = NSFileManager.defaultManager.URLsForDirectory(NSDocumentDirectory, NSUserDomainMask).first() as NSURL
     return url.path ?: error("no Documents directory")
 }

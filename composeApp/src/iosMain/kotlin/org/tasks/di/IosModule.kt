@@ -4,6 +4,7 @@ import androidx.room3.Room
 import com.todoroo.astrid.service.CommonUpgrades
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import okio.Path.Companion.toPath
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
@@ -21,6 +22,7 @@ import org.tasks.api.ApiWriter
 import org.tasks.api.DatabaseApiTaskFactory
 import org.tasks.api.ListManager
 import org.tasks.api.LocalListManager
+import org.tasks.appGroupPath
 import org.tasks.auth.IosOAuthFlow
 import org.tasks.auth.IosSignInHandler
 import org.tasks.auth.OAuthFlow
@@ -41,6 +43,7 @@ import org.tasks.data.db.Database
 import org.tasks.data.db.setBundledDriver
 import org.tasks.data.entity.CaldavAccount
 import org.tasks.data.entity.Task
+import org.tasks.documentsPath
 import org.tasks.fcm.ApnsTokenProvider
 import org.tasks.fcm.FcmTokenProvider
 import org.tasks.http.DarwinKtorClientFactory
@@ -52,6 +55,7 @@ import org.tasks.kmp.dataStoreFileName
 import org.tasks.logging.IosLogExporter
 import org.tasks.logging.LogExporter
 import org.tasks.logging.fileLogWriter
+import org.tasks.moveDataFiles
 import org.tasks.notifications.CancelReason
 import org.tasks.notifications.Notifier
 import org.tasks.preferences.TasksPreferences
@@ -63,14 +67,23 @@ import org.tasks.service.Upgrader
 import org.tasks.sse.SseClient
 import org.tasks.sync.SyncRunner
 import org.tasks.sync.SyncSource
-import platform.Foundation.NSDocumentDirectory
-import platform.Foundation.NSFileManager
-import platform.Foundation.NSURL
-import platform.Foundation.NSUserDomainMask
 
-internal val documentsPath: String by lazy {
-    val url = NSFileManager.defaultManager.URLsForDirectory(NSDocumentDirectory, NSUserDomainMask).first() as NSURL
-    url.path ?: error("no Documents directory")
+private var dataMoveError: Exception? = null
+
+/**
+ * The App Group container, after moving existing data there from Documents. Documents if the
+ * container is unavailable or the move failed (retried on the next launch).
+ */
+internal val dataPath: String by lazy {
+    val documents = documentsPath()
+    val group = appGroupPath()
+    try {
+        if (group != documents) moveDataFiles(documents.toPath(), group.toPath())
+        group
+    } catch (e: Exception) {
+        dataMoveError = e
+        documents
+    }
 }
 
 actual fun platformModule(): Module = module {
@@ -91,19 +104,19 @@ actual fun platformModule(): Module = module {
             crashlytics = crashlyticsInstalled,
             analytics = installedAnalytics,
             posthogKey = IosBuildConfig.POSTHOG_KEY,
-        )
+        ).also { reporting -> dataMoveError?.let { reporting.reportException(it) } }
     }
     single<Analytics> { get<Reporting>() }
     single<Database> {
-        Room.databaseBuilder<Database>(name = "$documentsPath/${Database.NAME}")
+        Room.databaseBuilder<Database>(name = "$dataPath/${Database.NAME}")
             .setBundledDriver()
             .addMigrations(*CommonMigrations.all)
             .addCallback(Database.CALLBACK)
             .build()
     }
-    single { TasksPreferences(createDataStore { "$documentsPath/$dataStoreFileName" }) }
+    single { TasksPreferences(createDataStore { "$dataPath/$dataStoreFileName" }) }
     factory { Upgrader(get(), CommonUpgrades.all(get())) }
-    factory { FileStorage(documentsPath) }
+    factory { FileStorage(dataPath) }
     factoryOf(::VtodoCache)
     single<Encryption> { SecureEnclaveEncryption() }
     single<KtorClientFactory> { DarwinKtorClientFactory() }
@@ -127,7 +140,7 @@ actual fun platformModule(): Module = module {
     factory<SignInHandler> { IosSignInHandler(get(), get(), get(), get(), get(), get(), get()) }
     single {
         PurchaseEntitlement(
-            dataDir = documentsPath,
+            dataDir = dataPath,
             encryption = get(),
             httpClientFactory = get(),
             serverEnvironment = get(),
