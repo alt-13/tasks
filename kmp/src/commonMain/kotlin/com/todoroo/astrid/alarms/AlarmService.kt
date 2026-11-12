@@ -158,6 +158,12 @@ class AlarmService(
         }
     }
 
+    /** Records every reminder due by the end of this minute as shown, without posting it. */
+    suspend fun skipOverdue() {
+        val cutoff = currentTimeMillis().startOfMinute() + ONE_MINUTE
+        recordFired(alarmsDueBefore(cutoff).first.map { it.copy(timestamp = cutoff - 1) })
+    }
+
     internal suspend fun alarmsDueBefore(
         cutoff: Long,
     ): Pair<List<Notification>, List<Notification>> {

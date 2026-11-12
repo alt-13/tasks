@@ -133,6 +133,7 @@ class TasksPreferences(private val dataStore: DataStore<Preferences>) {
         val screenClearedAtShutdown = booleanPreferencesKey("screen_cleared_at_shutdown")
         val notificationSession = stringPreferencesKey("notification_session")
         val scheduledNotifications = stringSetPreferencesKey("scheduled_notifications")
+        val overdueRemindersSkipped = booleanPreferencesKey("overdue_reminders_skipped")
         val defaultRemindersEnabled = booleanPreferencesKey("default_reminders_enabled")
         val defaultReminderTime = intPreferencesKey("default_reminder_time")
         val quietHoursEnabled = booleanPreferencesKey("quiet_hours_enabled")

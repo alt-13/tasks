@@ -81,7 +81,7 @@ actual fun platformModule(): Module = module {
         PlatformConfiguration(
             versionCode = TasksBuildConfig.VERSION_CODE,
             supportsCaldav = true,
-            supportsNotifications = false,
+            supportsSystemNotificationSettings = true,
             supportsLogExport = true,
             appStore = AppStore.APP_STORE,
             thirdPartySyncRequiresPro = true,

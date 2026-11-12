@@ -53,6 +53,12 @@ internal class IosNotifier(
     }
 
     private suspend fun reconcile() {
+        // reminders were off on iOS before, so nothing recorded the old ones: don't post them all now
+        if (!preferences.get(TasksPreferences.overdueRemindersSkipped, false)) {
+            alarmService().skipOverdue()
+            preferences.set(TasksPreferences.overdueRemindersSkipped, true)
+            Logger.d(tag = TAG) { "Skipped overdue reminders from before notifications were enabled" }
+        }
         val pending = identifiers(pending = true)
         val fired = NotificationWindow.fired(
             scheduled = preferences.get(TasksPreferences.scheduledNotifications, emptySet()),

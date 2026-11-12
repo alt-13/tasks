@@ -338,6 +338,25 @@ class AlarmServiceTest : DatabaseTest() {
         assertEquals(listOf(later), alarmDao.getAlarms(task.id).map { it.time })
     }
 
+    @Test
+    fun skippingOverdueRemindersPostsNothingButKeepsLaterOnes() = runTest(testDispatcher) {
+        val twice = createTask()
+        val snoozed = createTask()
+        val future = currentTimeMillis() + ONE_HOUR
+        alarmDao.insert(Alarm(task = twice.id, time = currentTimeMillis() - 2 * ONE_HOUR, type = TYPE_DATE_TIME))
+        alarmDao.insert(Alarm(task = twice.id, time = currentTimeMillis() - ONE_HOUR, type = TYPE_DATE_TIME))
+        alarmDao.insert(Alarm(task = twice.id, time = future, type = TYPE_DATE_TIME))
+        alarmDao.insert(Alarm(task = snoozed.id, time = currentTimeMillis() - ONE_MINUTE, type = TYPE_SNOOZE))
+
+        alarmService.skipOverdue()
+
+        val posted = mutableListOf<Long>()
+        val next = alarmService.triggerAlarms { entries -> entries.map { it.taskId }.also { posted.addAll(it) } }
+        assertEquals(emptyList<Long>(), posted)
+        assertEquals(future, next)
+        assertEquals(emptyList<Alarm>(), alarmDao.getAlarms(snoozed.id))
+    }
+
     @After
     fun restoreClock() {
         DateTimeUtils2.setCurrentMillisSystem()
