@@ -11,7 +11,9 @@ import org.tasks.ensureStarted
 import platform.UserNotifications.UNNotificationAction
 import platform.UserNotifications.UNNotificationActionOptionForeground
 import platform.UserNotifications.UNNotificationCategory
+import platform.UserNotifications.UNNotificationCategoryOptionCustomDismissAction
 import platform.UserNotifications.UNNotificationDefaultActionIdentifier
+import platform.UserNotifications.UNNotificationDismissActionIdentifier
 import platform.UserNotifications.UNUserNotificationCenter
 
 private const val TAG = "NotificationResponses"
@@ -48,17 +50,21 @@ private fun category(identifier: String, actions: List<UNNotificationAction>) =
         identifier,
         actions,
         emptyList<String>(),
-        0uL, // no options
+        UNNotificationCategoryOptionCustomDismissAction, // report swipe-aways, like desktop's macOS backend
     )
 
-/** Called by the app's `UNUserNotificationCenterDelegate` when a reminder is tapped or acted on. */
+/**
+ * Called by the app's `UNUserNotificationCenterDelegate` when a reminder is tapped, acted on or
+ * dismissed.
+ */
 fun onNotificationResponse(identifier: String, actionIdentifier: String, completion: () -> Unit) {
     val taskId = NotificationWindow.taskId(identifier)
+    val dismissed = actionIdentifier == UNNotificationDismissActionIdentifier
     val action = when (actionIdentifier) {
         UNNotificationDefaultActionIdentifier -> NotificationAction.OPEN
         else -> NotificationAction.fromKey(actionIdentifier)
     }
-    if (taskId == null || action == null) {
+    if (taskId == null || (action == null && !dismissed)) {
         Logger.d(tag = TAG) { "Ignoring $actionIdentifier on $identifier" }
         completion()
         return
@@ -66,10 +72,15 @@ fun onNotificationResponse(identifier: String, actionIdentifier: String, complet
     ensureStarted()
     val koin = KoinPlatform.getKoin()
     koin.get<CoroutineScope>().launch {
-        if (action == NotificationAction.OPEN) {
-            koin.get<TaskRequests>().awaitOpenRequests()
+        val handler = koin.get<NotificationActionHandler>()
+        if (action == null) {
+            handler.dismiss(taskId)
+        } else {
+            if (action == NotificationAction.OPEN) {
+                koin.get<TaskRequests>().awaitOpenRequests()
+            }
+            handler.handle(taskId, action)
         }
-        koin.get<NotificationActionHandler>().handle(taskId, action)
         // the app may have been launched in the background, without the reconcile loop
         koin.get<IosNotifier>().reconcileNow()
         withContext(Dispatchers.Main) { completion() }

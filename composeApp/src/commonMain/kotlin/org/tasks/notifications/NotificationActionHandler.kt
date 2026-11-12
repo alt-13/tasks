@@ -40,11 +40,13 @@ class NotificationActionHandler(
 
     override fun onDismissed(taskId: Long) {
         Logger.d(tag = TAG) { "Dismissed $taskId" }
-        scope.launch {
-            guarded(TAG, "Failed to clear $taskId", Unit) {
-                notifier().cancel(taskId, CancelReason.DISMISS)
-                alarmService().markDismissed(listOf(taskId))
-            }
+        scope.launch { dismiss(taskId) }
+    }
+
+    suspend fun dismiss(taskId: Long) {
+        guarded(TAG, "Failed to clear $taskId", Unit) {
+            notifier().cancel(taskId, CancelReason.DISMISS)
+            alarmService().markDismissed(listOf(taskId))
         }
     }
 

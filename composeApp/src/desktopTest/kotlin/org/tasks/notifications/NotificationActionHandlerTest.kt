@@ -146,6 +146,16 @@ class NotificationActionHandlerTest : DatabaseTest() {
     }
 
     @Test
+    fun dismissIsDoneWhenItReturns() = runTest {
+        val task = createTask()
+
+        handler.dismiss(task.id)
+
+        verifyBlocking(notifier) { cancel(task.id, CancelReason.DISMISS) }
+        assertTrue(taskDao.fetch(task.id)!!.reminderDismissed > 0)
+    }
+
+    @Test
     fun aNotificationTheServerDroppedIsNotADismissal() = runTest {
         val task = createTask()
 
