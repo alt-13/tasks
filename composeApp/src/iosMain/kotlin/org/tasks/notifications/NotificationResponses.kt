@@ -20,15 +20,19 @@ internal const val CATEGORY_ACTIONABLE = "org.tasks.reminder"
 internal const val CATEGORY_SNOOZE_ONLY = "org.tasks.reminder.snooze"
 
 internal suspend fun registerNotificationCategories() {
+    // resolve labels before the Objective-C calls: suspending between their arguments would
+    // drain the autorelease pool holding the already bridged identifier NSString
+    val completeLabel = NotificationAction.label(NotificationAction.COMPLETE)
+    val snoozeLabel = NotificationAction.label(NotificationAction.SNOOZE)
     val complete = UNNotificationAction.actionWithIdentifier(
         NotificationAction.COMPLETE.key,
-        NotificationAction.label(NotificationAction.COMPLETE),
+        completeLabel,
         0uL, // no options: runs in the background
     )
     // snoozing asks for a time in the app, like desktop and Android
     val snooze = UNNotificationAction.actionWithIdentifier(
         NotificationAction.SNOOZE.key,
-        NotificationAction.label(NotificationAction.SNOOZE),
+        snoozeLabel,
         UNNotificationActionOptionForeground,
     )
     UNUserNotificationCenter.currentNotificationCenter().setNotificationCategories(
