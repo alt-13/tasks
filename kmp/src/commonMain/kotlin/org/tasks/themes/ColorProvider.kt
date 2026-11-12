@@ -69,6 +69,34 @@ object ColorProvider {
         0xFF607D8B.toInt(), // blue_grey_500
     )
 
+    // Before 8.2, colors were stored as an index into this list (Android's Upgrader.getLegacyColor)
+    private val LEGACY_COLORS = listOf(
+        BLUE_GREY_500,
+        GREY_900,
+        RED_500,
+        0xFFE91E63.toInt(), // pink_500
+        0xFF9C27B0.toInt(), // purple_500
+        0xFF673AB7.toInt(), // deep_purple_500
+        0xFF3F51B5.toInt(), // indigo_500
+        BLUE_500,
+        0xFF03A9F4.toInt(), // light_blue_500
+        0xFF00BCD4.toInt(), // cyan_500
+        0xFF009688.toInt(), // teal_500
+        0xFF4CAF50.toInt(), // green_500
+        0xFF8BC34A.toInt(), // light_green_500
+        0xFFCDDC39.toInt(), // lime_500
+        0xFFFFEB3B.toInt(), // yellow_500
+        0xFFFFC107.toInt(), // amber_500
+        0xFFFF9800.toInt(), // orange_500
+        0xFFFF5722.toInt(), // deep_orange_500
+        0xFF795548.toInt(), // brown_500
+        GREY_500,
+        WHITE,
+    )
+
+    /** The color for a pre-8.2 color index, or 0 (no color) for an unknown index. */
+    fun legacyColor(index: Int): Int = LEGACY_COLORS.getOrElse(index) { 0 }
+
     fun themeColor(
         seedColor: Int,
         isDark: Boolean,

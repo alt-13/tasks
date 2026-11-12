@@ -11,17 +11,23 @@ import org.junit.rules.TemporaryFolder
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.tasks.DatabaseTest
+import org.tasks.InMemoryDataStore
 import org.tasks.caldav.FileStorage
 import org.tasks.caldav.VtodoCache
+import org.tasks.data.TaskMover
 import org.tasks.data.entity.CaldavAccount
 import org.tasks.data.entity.CaldavAccount.Companion.TYPE_CALDAV
 import org.tasks.data.entity.CaldavAccount.Companion.TYPE_GOOGLE_TASKS
+import org.tasks.data.entity.CaldavAccount.Companion.TYPE_LOCAL
 import org.tasks.data.entity.CaldavAccount.Companion.TYPE_MICROSOFT
 import org.tasks.data.entity.CaldavAccount.Companion.TYPE_TASKS
 import org.tasks.data.entity.CaldavCalendar
 import org.tasks.data.entity.CaldavTask
 import org.tasks.data.entity.TagData
 import org.tasks.data.entity.Task
+import org.tasks.kmp.org.tasks.themes.ColorProvider
+import org.tasks.preferences.AppPreferences
+import org.tasks.preferences.TasksPreferences
 
 class BackupImporterTest : DatabaseTest() {
     @get:Rule val folder = TemporaryFolder()
@@ -29,6 +35,11 @@ class BackupImporterTest : DatabaseTest() {
     private val taskDao = db.taskDao()
     private val caldavDao = db.caldavDao()
     private val tagDataDao = db.tagDataDao()
+    private val tasksPreferences = TasksPreferences(InMemoryDataStore())
+    private val appPreferences: AppPreferences = mock {
+        onBlocking { isDefaultDueTimeEnabled() } doReturn true
+        onBlocking { addTasksToTop() } doReturn false
+    }
     private val vtodoCache by lazy { VtodoCache(caldavDao, FileStorage(folder.root.path)) }
     private val importer by lazy {
         BackupImporter(
@@ -43,10 +54,12 @@ class BackupImporterTest : DatabaseTest() {
             filterDao = db.filterDao(),
             taskAttachmentDao = db.taskAttachmentDao(),
             caldavDao = caldavDao,
-            appPreferences = mock { onBlocking { isDefaultDueTimeEnabled() } doReturn true },
+            appPreferences = appPreferences,
             taskListMetadataDao = db.taskListMetadataDao(),
             vtodoCache = vtodoCache,
             analytics = mock(),
+            tasksPreferences = tasksPreferences,
+            taskMover = TaskMover(taskDao, caldavDao, db.googleTaskDao(), db.dirtyDao(), appPreferences, mock(), mock()),
         )
     }
 
@@ -86,6 +99,12 @@ class BackupImporterTest : DatabaseTest() {
             taskDao.createNew(task)
             it.caldavTasks!!.forEach { caldavTask -> caldavDao.insert(caldavTask.copy(task = task.id)) }
         }
+    }
+
+    /** Backups before 9.6 move tasks to the local list. Creating it in a test needs Compose resources. */
+    private suspend fun insertLocalList() {
+        caldavDao.insert(CaldavAccount(uuid = "local", accountType = TYPE_LOCAL))
+        caldavDao.insert(CaldavCalendar(account = "local", uuid = "local-list"))
     }
 
     private fun assertResult(taskCount: Int, importCount: Int, skipCount: Int, result: BackupImporter.ImportResult) {
@@ -240,10 +259,77 @@ class BackupImporterTest : DatabaseTest() {
 
     @Test
     fun rebuildsFiltersFromBefore13_2() = runBlocking {
+        insertLocalList()
         import(BACKUP_V491)
 
         val filter = db.filterDao().getFilters().single()
         assertEquals(true, filter.sql!!.contains("tasks.dueDate<='EOD()'"))
+    }
+
+    @Test
+    fun importsPreferencesWithSharedNames() = runBlocking {
+        import(
+            """{"version":$CURRENT,"data":{"intPrefs":{"theme_color":-769226,"install_version":120000},""" +
+                """"longPrefs":{"install_date":1},""" +
+                """"stringPrefs":{"default_tags":"t1,t2","default_recurrence_from":"1","default_list":"4:cal-1"},""" +
+                """"boolPrefs":{"markdown":true,"p_tags_enabled":false,"debug_pro":true},"setPrefs":{"p_x":["1"]}}}"""
+        )
+
+        assertEquals(-769226, tasksPreferences.get(TasksPreferences.themeColor, 0))
+        assertEquals("t1,t2", tasksPreferences.get(TasksPreferences.defaultTags, ""))
+        assertEquals(1, tasksPreferences.get(TasksPreferences.defaultRecurrenceFrom, 0))
+        assertEquals(true, tasksPreferences.get(TasksPreferences.markdown, false))
+        assertEquals("", tasksPreferences.get(TasksPreferences.defaultList, ""))
+        assertEquals(0, tasksPreferences.get(TasksPreferences.installVersion, 0))
+        assertEquals(0L, tasksPreferences.get(TasksPreferences.installDate, 0L))
+        assertEquals(false, tasksPreferences.get(TasksPreferences.debugPro, false))
+    }
+
+    @Test
+    fun convertsColorIndexesFromBefore8_2() = runBlocking {
+        insertLocalList()
+        import(
+            """{"version":674,"data":{"tags":[{"remoteId":"tag-1","name":"red","color":2}],""" +
+                """"caldavAccounts":[{"uuid":"acc-1","accountType":0}],""" +
+                """"caldavCalendars":[{"account":"acc-1","uuid":"cal-1","color":20}],""" +
+                """"intPrefs":{"theme_color":7}}}"""
+        )
+
+        assertEquals(-769226, tagDataDao.getByUuid("tag-1")!!.color)
+        assertEquals(ColorProvider.WHITE, caldavDao.getCalendarByUuid("cal-1")!!.color)
+        assertEquals(ColorProvider.BLUE_500, tasksPreferences.get(TasksPreferences.themeColor, 0))
+    }
+
+    @Test
+    fun migratesNumericIcons() = runBlocking {
+        import(BACKUP_V111201)
+
+        assertEquals("home", tagDataDao.getByUuid("3e51b0c4-7a2d-4f19-8c3e-1d2f3a4b5c6d")!!.icon)
+        assertEquals("work_outline", caldavDao.getCalendarByUuid("MTE2MjM0NTY3")!!.icon)
+        assertEquals(null, caldavDao.getCalendarByUuid("4f2b8d1e-6a3c-4b5d-9e8f-0a1b2c3d4e5f")!!.icon)
+        assertEquals(null, db.locationDao().getByUid("b7e0c3a2-5c1d-4e3f-9a8b-7c6d5e4f3a2b")!!.icon)
+        assertEquals(null, db.filterDao().getFilters().single().icon)
+    }
+
+    @Test
+    fun movesTasksWithoutListToLocalListFromBefore9_6() = runBlocking {
+        insertLocalList()
+        import(backup(tasks = listOf(TaskBackup(Task(title = "local", remoteId = "uuid-1"))), version = 90599))
+
+        val task = taskDao.getAll().single()
+        assertEquals("local-list", caldavDao.getTasks(task.id).single().calendar)
+    }
+
+    @Test
+    fun keepsCommentPicturesFromBefore6_4() = runBlocking {
+        insertLocalList()
+        import(BACKUP_V491)
+
+        val task = taskDao.getAll().single { it.title == "Call mom" }
+        assertEquals(
+            """{"uri":"content://org.tasks/attachments/list.jpg"}""",
+            db.userActivityDao().getComments(task.id).single().picture,
+        )
     }
 
     companion object {

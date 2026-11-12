@@ -11,7 +11,7 @@ import org.tasks.data.entity.Alarm.Companion.TYPE_RANDOM
 import org.tasks.data.entity.Alarm.Companion.TYPE_REL_END
 import org.tasks.data.entity.Alarm.Companion.TYPE_REL_START
 import org.tasks.data.TaskMover
-import com.todoroo.astrid.service.Upgrade_13_11.Companion.migrateLegacyIcon
+import org.tasks.themes.migrateLegacyIcon
 import com.todoroo.astrid.service.Upgrade_13_2
 import com.todoroo.astrid.service.Upgrade_14_11
 import com.todoroo.astrid.service.Upgrade_14_13
