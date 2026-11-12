@@ -26,7 +26,7 @@ import org.tasks.time.DateTimeUtils2.currentTimeMillis
 import org.tasks.time.printTimestamp
 import platform.BackgroundTasks.BGAppRefreshTaskRequest
 import platform.BackgroundTasks.BGTaskScheduler
-import platform.BackgroundTasks.BGTaskSchedulerErrorCode
+import platform.BackgroundTasks.BGTaskSchedulerErrorCodeUnavailable
 import platform.BackgroundTasks.BGTaskSchedulerErrorDomain
 import platform.Foundation.NSDate
 import platform.Foundation.NSError
@@ -115,7 +115,7 @@ class IosBackgroundWork(
         }
         val e = error.value
         val unavailable = e != null && e.domain == BGTaskSchedulerErrorDomain &&
-            e.code == BGTaskSchedulerErrorCode.BGTaskSchedulerErrorCodeUnavailable.value
+            e.code == BGTaskSchedulerErrorCodeUnavailable
         if (unavailable) {
             // Background App Refresh turned off, Low Power Mode or the simulator
             Logger.i(tag = TAG) { "background refresh unavailable" }
