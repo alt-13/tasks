@@ -114,6 +114,23 @@ class NotificationWindowTest {
         assertEquals(listOf(now + 10 * MINUTE), upcoming(alarms).map { it.timestamp })
     }
 
+    @Test
+    fun aBurstPostsOnlyTheNewestUpToTheCap() {
+        val overdue = (1..MAX_NOTIFICATIONS + 4L).map { entry(taskId = it, at = now) }
+
+        val (skipped, posted) = NotificationWindow.capped(overdue)
+
+        assertEquals((1..4L).toList(), skipped.map { it.taskId })
+        assertEquals((5..MAX_NOTIFICATIONS + 4L).toList(), posted.map { it.taskId })
+    }
+
+    @Test
+    fun noneAreSkippedUpToTheCap() {
+        val overdue = (1..MAX_NOTIFICATIONS.toLong()).map { entry(taskId = it, at = now) }
+
+        assertEquals(emptyList<Notification>() to overdue, NotificationWindow.capped(overdue))
+    }
+
     private fun upcoming(alarms: List<Alarm>) =
         AlarmCalculator(Random()).upcoming(
             task = Task(id = 1),

@@ -33,6 +33,13 @@ object NotificationWindow {
         return pending.filter { taskId(it) != null && it !in keep }
     }
 
+    /**
+     * Splits reminders that came due together (oldest first) like desktop does: only the newest
+     * [MAX_NOTIFICATIONS] are posted, the older ones are recorded as shown without posting.
+     */
+    fun capped(overdue: List<Notification>): Pair<List<Notification>, List<Notification>> =
+        overdue.dropLast(MAX_NOTIFICATIONS) to overdue.takeLast(MAX_NOTIFICATIONS)
+
     // requests from the last reconcile that are no longer pending: the platform has shown them
     fun fired(scheduled: Collection<String>, pending: Collection<String>): List<Notification> {
         val waiting = pending.toSet()

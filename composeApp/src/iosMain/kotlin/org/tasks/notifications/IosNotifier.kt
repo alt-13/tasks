@@ -97,9 +97,14 @@ internal class IosNotifier(
 
     private suspend fun post(overdue: List<Notification>): List<Long> {
         val tasks = taskDao.fetch(overdue.map { it.taskId }).associateBy { it.id }
-        return overdue.mapNotNull { entry ->
-            val task = tasks[entry.taskId] ?: return@mapNotNull null
-            schedule(task, entry, trigger = null)
+        // e.g. a sync bringing in many overdue tasks at once
+        val (skipped, posting) = NotificationWindow.capped(overdue.filter { it.taskId in tasks })
+        skipped.forEach { taskDao.setLastNotified(it.taskId, it.timestamp.endOfMinute()) }
+        if (skipped.isNotEmpty()) {
+            Logger.d(tag = TAG) { "Over the cap of $MAX_NOTIFICATIONS, skipped ${skipped.map { it.taskId }}" }
+        }
+        return posting.map { entry ->
+            schedule(tasks.getValue(entry.taskId), entry, trigger = null)
             taskDao.setLastNotified(entry.taskId, entry.timestamp.endOfMinute())
             entry.taskId
         }
