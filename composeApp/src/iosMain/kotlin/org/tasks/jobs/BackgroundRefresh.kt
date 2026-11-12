@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import org.koin.mp.KoinPlatform
 import org.tasks.analytics.Reporting
 import org.tasks.ensureStarted
+import org.tasks.notifications.Notifier
 import org.tasks.sync.SyncRunner
 import org.tasks.sync.SyncSource
 import org.tasks.sync.launchBackgroundSync
@@ -32,7 +33,13 @@ fun onBackgroundRefresh(completion: (Boolean) -> Unit): () -> Unit {
             completion(finished)
         },
     ) {
-        koin.get<SyncRunner>().syncNow(SyncSource.BACKGROUND)
+        koin.get<IosBackgroundWork>().onRefreshStarted()
+        try {
+            koin.get<SyncRunner>().syncNow(SyncSource.BACKGROUND)
+        } finally {
+            // rolls the reminder window forward
+            koin.get<Notifier>().triggerNotifications()
+        }
     }
     return { job.cancel() }
 }

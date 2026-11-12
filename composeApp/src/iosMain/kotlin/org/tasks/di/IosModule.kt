@@ -3,8 +3,6 @@ package org.tasks.di
 import androidx.room3.Room
 import com.todoroo.astrid.alarms.AlarmService
 import com.todoroo.astrid.service.CommonUpgrades
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
@@ -41,12 +39,12 @@ import org.tasks.data.db.CommonMigrations
 import org.tasks.data.db.Database
 import org.tasks.data.db.setBundledDriver
 import org.tasks.data.entity.CaldavAccount
-import org.tasks.data.entity.Task
 import org.tasks.fcm.ApnsTokenProvider
 import org.tasks.fcm.FcmTokenProvider
 import org.tasks.http.DarwinKtorClientFactory
 import org.tasks.http.KtorClientFactory
 import org.tasks.jobs.BackgroundWork
+import org.tasks.jobs.IosBackgroundWork
 import org.tasks.kmp.IosBuildConfig
 import org.tasks.kmp.createDataStore
 import org.tasks.kmp.dataStoreFileName
@@ -65,7 +63,6 @@ import org.tasks.service.TaskMigrator
 import org.tasks.service.Upgrader
 import org.tasks.sse.SseClient
 import org.tasks.sync.SyncRunner
-import org.tasks.sync.SyncSource
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
@@ -153,19 +150,8 @@ actual fun platformModule(): Module = module {
             }
         }
     }
-    single<BackgroundWork> {
-        val scope = get<CoroutineScope>()
-        val runner = get<SyncRunner>()
-        object : BackgroundWork {
-            override fun updateCalendar(task: Task) {}
-            override suspend fun scheduleRefresh(timestamp: Long) {}
-            override suspend fun sync(source: SyncSource) = runner.sync(source)
-            override suspend fun scheduleBlogFeedCheck() {}
-            override fun migrateLocalTasks(localAccount: CaldavAccount, tasksAccount: CaldavAccount) {
-                scope.launch { get<TaskMigrator>().migrateLocalTasks(localAccount, tasksAccount) }
-            }
-        }
-    }
+    single { IosBackgroundWork(get(), get(), get(), get()) { get<TaskMigrator>() } }
+    single<BackgroundWork> { get<IosBackgroundWork>() }
     single {
         IosNotifier(
             alarmService = { get<AlarmService>() },
