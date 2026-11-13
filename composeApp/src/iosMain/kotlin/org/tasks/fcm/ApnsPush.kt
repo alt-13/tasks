@@ -9,6 +9,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.mp.KoinPlatform
 import org.tasks.ensureStarted
+import org.tasks.notifications.IosNotifier
 import org.tasks.preferences.InstallId
 import org.tasks.preferences.TasksPreferences
 import org.tasks.sse.SseClient
@@ -72,6 +73,10 @@ fun onApnsPush(completion: (Boolean) -> Unit) {
             true
         } ?: false
         Logger.d(TAG) { "push sync ${if (finished) "finished" else "timed out"}" }
+        // a push can launch the app without UI, so no reconcile loop runs; skip it once iOS's time is nearly up
+        if (finished) {
+            koin.get<IosNotifier>().reconcileNow()
+        }
         withContext(Dispatchers.Main) { completion(finished) }
     }
 }
