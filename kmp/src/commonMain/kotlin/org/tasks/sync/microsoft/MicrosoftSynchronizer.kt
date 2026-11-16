@@ -3,6 +3,7 @@ package org.tasks.sync.microsoft
 import co.touchlab.kermit.Logger
 import io.ktor.client.call.body
 import kotlinx.coroutines.CancellationException
+import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
 import org.tasks.analytics.AnalyticsEvents.INITIAL_SYNC_COMPLETE
 import org.tasks.analytics.AnalyticsEvents.PARAM_TASK_COUNT
@@ -11,6 +12,7 @@ import org.tasks.analytics.Constants
 import org.tasks.analytics.Reporting
 import org.tasks.broadcast.RefreshBroadcaster
 import org.tasks.caldav.VtodoCache
+import org.tasks.caldav.isTlsSetupFailure
 import org.tasks.data.TaskSaver
 import org.tasks.data.dao.CaldavDao
 import org.tasks.data.dao.DirtyDao
@@ -32,6 +34,7 @@ import org.tasks.http.NetworkException
 import org.tasks.http.NotFoundException
 import org.tasks.http.ServiceUnavailableException
 import org.tasks.http.UnauthorizedException
+import org.tasks.http.isUnreachable
 import org.tasks.preferences.AppPreferences
 import org.tasks.resources.getString
 import org.tasks.service.TaskDeleter
@@ -40,13 +43,6 @@ import org.tasks.sync.microsoft.MicrosoftConverter.applySubtask
 import org.tasks.sync.microsoft.MicrosoftConverter.toChecklistItem
 import org.tasks.sync.microsoft.MicrosoftConverter.toRemote
 import org.tasks.time.DateTimeUtils2.currentTimeMillis
-import java.io.IOException
-import java.net.ConnectException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
-import java.security.KeyManagementException
-import java.security.NoSuchAlgorithmException
-import javax.net.ssl.SSLException
 import tasks.kmp.generated.resources.Res
 import tasks.kmp.generated.resources.cannot_access_account
 import tasks.kmp.generated.resources.network_error
@@ -94,23 +90,15 @@ class MicrosoftSynchronizer(
             setError(account, "")
         } catch (e: CancellationException) {
             throw e
-        } catch (e: SocketTimeoutException) {
-            setNetworkError(account, e)
-        } catch (e: SSLException) {
-            setError(account, e.message)
-        } catch (e: ConnectException) {
-            setNetworkError(account, e)
-        } catch (e: UnknownHostException) {
-            setNetworkError(account, e)
+        } catch (e: IOException) {
+            if (e.isUnreachable()) {
+                setNetworkError(account, e)
+            } else {
+                setError(account, e.message)
+            }
         } catch (e: UnauthorizedException) {
             setError(account, e.message)
         } catch (e: ServiceUnavailableException) {
-            setError(account, e.message)
-        } catch (e: KeyManagementException) {
-            setError(account, e.message)
-        } catch (e: NoSuchAlgorithmException) {
-            setError(account, e.message)
-        } catch (e: IOException) {
             setError(account, e.message)
         } catch (e: HttpException) {
             val message = when (e.code) {
@@ -125,7 +113,9 @@ class MicrosoftSynchronizer(
             setNetworkError(account, e)
         } catch (e: Exception) {
             setError(account, e.message)
-            reporting.reportException(e)
+            if (!e.isTlsSetupFailure()) {
+                reporting.reportException(e)
+            }
         }
     }
 

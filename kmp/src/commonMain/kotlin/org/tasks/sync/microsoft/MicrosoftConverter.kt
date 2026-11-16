@@ -1,5 +1,10 @@
 package org.tasks.sync.microsoft
 
+import kotlinx.datetime.IllegalTimeZoneException
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import org.tasks.data.createDueDate
 import org.tasks.data.entity.CaldavTask
 import org.tasks.data.entity.TagData
@@ -13,10 +18,6 @@ import org.tasks.repeats.Recur
 import org.tasks.repeats.Weekday
 import org.tasks.time.DateTime
 import org.tasks.time.DateTimeUtils2.currentTimeMillis
-import java.text.SimpleDateFormat
-import java.time.ZonedDateTime
-import java.util.Locale
-import java.util.TimeZone
 
 object MicrosoftConverter {
 
@@ -51,8 +52,8 @@ object MicrosoftConverter {
             defaultPriority != Task.Priority.HIGH -> defaultPriority
             else -> Task.Priority.NONE
         }
-        completionDate = remote.completedDateTime.toLong(currentTimeMillis())
-        remote.dueDateTime.toLong(0L).let {
+        completionDate = remote.completedDateTime.toLong()
+        remote.dueDateTime.toLong().let {
             if (it > 0 && hasDueTime()) {
                 val oldDate = DateTimeUtils.newDateTime(dueDate)
                 val newDate = DateTimeUtils.newDateTime(it)
@@ -125,12 +126,12 @@ object MicrosoftConverter {
             dueDateTime = if (hasDueDate()) {
                 Tasks.Task.DateTime(
                         dateTime = DateTime(dueDate).startOfDay().toString(DATE_TIME_FORMAT),
-                        timeZone = TimeZone.getDefault().id
+                        timeZone = TimeZone.currentSystemDefault().id
                 )
             } else if (isRecurring) { // fallback: recurring task must have due date
                 Tasks.Task.DateTime(
                         dateTime = DateTime().startOfDay().toString(DATE_TIME_FORMAT),
-                        timeZone = TimeZone.getDefault().id
+                        timeZone = TimeZone.currentSystemDefault().id
                 )
             } else {
                 null
@@ -140,7 +141,7 @@ object MicrosoftConverter {
             completedDateTime = if (isCompleted) {
                 Tasks.Task.DateTime(
                     dateTime = DateTime(completionDate).toString(DATE_TIME_FORMAT),
-                    timeZone = TimeZone.getDefault().id,
+                    timeZone = TimeZone.currentSystemDefault().id,
                 )
             } else {
                 null
@@ -207,18 +208,27 @@ object MicrosoftConverter {
 
     private fun String?.parseDateTime(): Long =
         this
-            ?.let { ZonedDateTime.parse(this).toInstant().toEpochMilli() }
+            ?.let { Instant.parse(it).toEpochMilliseconds() }
             ?: currentTimeMillis()
 
-    private fun Tasks.Task.DateTime?.toLong(default: Long): Long =
+    // Same result as the former SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.ssssss"): the digits after
+    // the dot replace the seconds, and unknown zone names (e.g. Windows names) fall back to UTC.
+    private fun Tasks.Task.DateTime?.toLong(): Long =
         this
             ?.let { task ->
-                val tz = TimeZone.getTimeZone(task.timeZone)
-                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.ssssss", Locale.US)
-                    .apply { timeZone = tz }
-                    .parse(task.dateTime)
-                    ?.time
-                    ?: default
+                val (year, month, day, hour, minute, seconds) = DATE_TIME.find(task.dateTime)
+                    ?.destructured
+                    ?: throw IllegalArgumentException("Unparseable date: \"${task.dateTime}\"")
+                val zone = try {
+                    TimeZone.of(task.timeZone)
+                } catch (_: IllegalTimeZoneException) {
+                    TimeZone.UTC
+                }
+                LocalDateTime(year.toInt(), month.toInt(), day.toInt(), hour.toInt(), minute.toInt())
+                    .toInstant(zone)
+                    .toEpochMilliseconds() + seconds.toLong() * 1000
             }
             ?: 0L
+
+    private val DATE_TIME = Regex("""^(\d+)-(\d+)-(\d+)T(\d+):(\d+):\d+\.(\d+)""")
 }
