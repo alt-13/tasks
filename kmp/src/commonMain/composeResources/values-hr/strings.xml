@@ -616,4 +616,9 @@
     <string name="mcp_copy">Kopiraj</string>
     <string name="new_filter">Stvori filtar</string>
     <string name="subscription_required">Potrebna je pretplata</string>
+    <string name="import_summary_title">Obnovi sažetak</string>
+    <string name="import_summary_message">Datoteka %1$s je sadržala %2$s.\n\n%3$s uvezena,\n%4$s već postoje\n%5$s s greškama</string>
+    <string name="import_progress_read">Učitavanje zadatka %1$d…</string>
+    <string name="import_failed">Uvoz neuspio</string>
+    <string name="import_failed_message">Nije moguće čitati datoteku sigurnosne kopije</string>
 </resources>

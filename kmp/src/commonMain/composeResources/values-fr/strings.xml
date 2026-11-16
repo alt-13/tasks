@@ -743,4 +743,9 @@
     <string name="subscription_free_until">Gratuit jusqu\'au %1$s, puis %2$s</string>
     <string name="subscription_payment_failed">Le paiement a échoué, veuillez mettre à jour les informations de votre carte</string>
     <string name="change_plan">Modifier le forfait</string>
+    <string name="import_summary_title">Résumé de la restauration</string>
+    <string name="import_summary_message">Le fichier %1$s contenait %2$s.\n\n‐ %3$s importées\n‐ %4$s existaient déjà\n‐ %5$s contenaient des erreurs</string>
+    <string name="import_progress_read">Lecture de la tâche %1$d…</string>
+    <string name="import_failed">Échec de l'importation</string>
+    <string name="import_failed_message">Impossible de lire le fichier de sauvegarde</string>
 </resources>

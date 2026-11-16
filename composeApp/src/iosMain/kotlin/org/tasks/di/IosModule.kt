@@ -26,6 +26,8 @@ import org.tasks.auth.IosSignInHandler
 import org.tasks.auth.OAuthFlow
 import org.tasks.auth.SignInHandler
 import org.tasks.auth.TasksOAuthClient
+import org.tasks.backup.BackupFilePicker
+import org.tasks.backup.IosBackupFilePicker
 import org.tasks.billing.EntitlementSubscriptionProvider
 import org.tasks.billing.debugProFlow
 import org.tasks.billing.PurchaseEntitlement
@@ -80,11 +82,13 @@ actual fun platformModule(): Module = module {
             supportsCaldav = true,
             supportsNotifications = false,
             supportsLogExport = true,
+            supportsBackupImport = true,
             appStore = AppStore.APP_STORE,
             thirdPartySyncRequiresPro = true,
         )
     }
     single<LogExporter> { IosLogExporter(fileLogWriter) }
+    single<BackupFilePicker> { IosBackupFilePicker() }
     single<Reporting>(createdAtStart = true) {
         IosReporting(
             tasksPreferences = get(),

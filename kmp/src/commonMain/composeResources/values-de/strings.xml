@@ -722,4 +722,9 @@
     <string name="trusted_certificates_reset">Zurücksetzen vertrauenswürdiger Zertifikate</string>
     <string name="reset_trusted_certificates">Vertrauenswürdige Zertifikate zurücksetzen</string>
     <string name="reset_trusted_certificates_summary">Von dir akzeptierte Zertifikate und Zertifikataussteller für Server löschen</string>
+    <string name="import_summary_title">Zusammenfassung wiederherstellen</string>
+    <string name="import_summary_message">Datei %1$s enthielt %2$s.\n\n%3$s importiert,\n%4$s bereits vorhanden\n%5$s fehlerhaft</string>
+    <string name="import_progress_read">Aufgabe %1$d wird gelesen …</string>
+    <string name="import_failed">Import fehlgeschlagen</string>
+    <string name="import_failed_message">Sicherungsdatei konnte nicht gelesen werden</string>
 </resources>

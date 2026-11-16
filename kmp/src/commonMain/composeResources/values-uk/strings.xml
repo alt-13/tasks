@@ -503,4 +503,9 @@
     <string name="accept">Прийняти</string>
     <string name="email_to_task">Е-лист до завдання</string>
     <string name="subscription_required">Потрібна передплата</string>
+    <string name="import_summary_title">Відновити підсумок</string>
+    <string name="import_summary_message">Файл %1$s містив %2$s.\n\n%3$s імпортовано,\n%4$s вже існувало,\n%5$s з помилками</string>
+    <string name="import_progress_read">Читання завдання %1$d…</string>
+    <string name="import_failed">Не вдалося імпортувати</string>
+    <string name="import_failed_message">Не вдалося прочитати файл резервної копії</string>
 </resources>

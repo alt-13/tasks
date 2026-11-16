@@ -723,4 +723,9 @@
     <string name="change_plan_trial">Via senpaga testo finiĝos je %1$s. Post la fino de via testo, ni fakturos al vi kontraŭ %2$s.</string>
     <string name="subscription_free_until">Senpage ĝis %1$s, poste %2$s</string>
     <string name="subscription_payment_failed">Pago malsukcesis, aktualigu vian kreditkarton</string>
+    <string name="import_summary_title">Restaŭri resumon</string>
+    <string name="import_summary_message">Dosiero %1$s enhavis %2$s.\n\n%3$s importitaj,\n%4$s jam ekzistas\n%5$s havis erarojn</string>
+    <string name="import_progress_read">Legas taskon, %1$d…</string>
+    <string name="import_failed">Importo malsukcesis</string>
+    <string name="import_failed_message">Malsukcesis legi dosieron de savkopio</string>
 </resources>

@@ -617,4 +617,9 @@
     <string name="mcp_copy">Kopírovat</string>
     <string name="new_filter">Vytvořit nový filtr</string>
     <string name="subscription_required">Vyžadováno předplatné</string>
+    <string name="import_summary_title">Souhrn obnovy</string>
+    <string name="import_summary_message">Soubor %1$s obsahoval %2$s.\n\n%3$s importováno\n%4$s již existovalo\n%5$s obsahovalo chyby</string>
+    <string name="import_progress_read">Načítání úkolu %1$d…</string>
+    <string name="import_failed">Import selhal</string>
+    <string name="import_failed_message">Nepodařilo se přečíst soubor zálohy</string>
 </resources>

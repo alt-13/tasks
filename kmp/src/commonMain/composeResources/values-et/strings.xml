@@ -713,4 +713,9 @@
     <string name="restore_renewal_settling">Sinu tellimuse uuendamine on veel töös</string>
     <string name="purchases_restored">Ostud on taastatud</string>
     <string name="card_subscription">Tellimus kaardiga</string>
+    <string name="import_summary_title">Taasta kokkuvõte</string>
+    <string name="import_summary_message">%1$s fail sisdaldas%2$s.\n\n%3$s imporditud,\n%4$s on juba olemas,\n%5$s oli vigadega</string>
+    <string name="import_progress_read">Loeme ülesannet %1$d…</string>
+    <string name="import_failed">Importimine ei õnnestunud</string>
+    <string name="import_failed_message">Varukoopia faili lugemine ei õnnestunud</string>
 </resources>

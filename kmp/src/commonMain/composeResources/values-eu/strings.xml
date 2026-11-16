@@ -408,4 +408,7 @@
     <string name="mcp_tools_group_reminders">Oroigarriak</string>
     <string name="mcp_copy">Kopiatu</string>
     <string name="new_filter">Sortu iragazki berria</string>
+    <string name="import_summary_title">Berrezartzearen laburpena</string>
+    <string name="import_summary_message">%1$s fitxategiak %2$s zituen.\n\n%3$s inportatuta,\n%4$s bazeuden aurretik\n%5$sk erroreak zituzten</string>
+    <string name="import_progress_read">%1$d zeregina irakurtzen…</string>
 </resources>

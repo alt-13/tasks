@@ -32,4 +32,9 @@
     <string name="keep_editing">बदलाव करना जारी रखें</string>
     <string name="DLG_delete_this_task_question">इस टास्क को मिटाएँ?</string>
     <string name="more_options">ज़्यादा विकल्प</string>
+    <string name="import_summary_title">सारांश पुनर्स्थापित करें</string>
+    <string name="import_summary_message">फ़ाइल %1$s में %2$s थे।\n\n%3$s इम्पोर्ट किया गया,\n%4$s पहले से मौजूद हैं\n%5$s में गड़बड़ियाँ थीं</string>
+    <string name="import_progress_read">कार्य %1$d पढ़ा जा रहा है…</string>
+    <string name="import_failed">इम्पोर्ट असफल</string>
+    <string name="import_failed_message">बैकअप फ़ाइल पढ़ नहीं सका</string>
 </resources>

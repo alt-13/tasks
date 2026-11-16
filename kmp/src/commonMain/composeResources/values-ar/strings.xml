@@ -535,4 +535,7 @@
     <string name="mcp_tools_group_reminders">تذكيرات</string>
     <string name="mcp_copy">نسخ</string>
     <string name="new_filter">أنشأ تصفيةً جديدة</string>
+    <string name="import_summary_title">إستعادة المُلخَّص</string>
+    <string name="import_summary_message">الملف %1$s احتوى على %2$s.\n\nتم استيراد %3$s،\n%4$s موجود مسبقًا\nمشاكل في %5$s</string>
+    <string name="import_progress_read">قراءة المهمة %1$d…</string>
 </resources>

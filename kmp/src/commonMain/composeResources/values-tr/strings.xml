@@ -723,4 +723,9 @@
     <string name="subscription_ended_on">Bitti: %1$s</string>
     <string name="subscription_free_until">Şuna dek ücretsiz: %1$s, sonrası %2$s</string>
     <string name="subscription_payment_failed">Ödeme başarısız, kartınızı güncelleyin</string>
+    <string name="import_summary_title">Geri Alma Özeti</string>
+    <string name="import_summary_message">%1$s dosyası %2$s içeriyor.\n\n%3$s içe aktarıldı,\n%4$s zaten var,\n%5$s hata var.</string>
+    <string name="import_progress_read">%1$d görev okunuyor…</string>
+    <string name="import_failed">İçe aktarma başarısız</string>
+    <string name="import_failed_message">Yedek dosyası okunamadı</string>
 </resources>

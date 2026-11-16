@@ -144,6 +144,8 @@ import org.tasks.analytics.AnalyticsEvents
 import org.tasks.analytics.Reporting
 import org.tasks.auth.OAuthProvider
 import org.tasks.auth.TasksServerEnvironment
+import org.tasks.backup.ImportBackupDialog
+import org.tasks.backup.ImportBackupViewModel
 import org.tasks.billing.BillingProvider
 import org.tasks.billing.DesktopLinkClient
 import org.tasks.billing.GitHubSponsorClient
@@ -337,6 +339,16 @@ fun App(
             val appViewModel = koinViewModel<AppViewModel>()
             val configuration = koinInject<PlatformConfiguration>()
             val reporting = koinInject<Reporting>()
+            // here, not in the welcome screen, which goes away once the import adds an account
+            val importViewModel = if (configuration.supportsBackupImport) {
+                koinViewModel<ImportBackupViewModel>()
+            } else {
+                null
+            }
+            importViewModel?.let {
+                val importState by it.state.collectAsState()
+                ImportBackupDialog(importState, onDismiss = it::dismiss)
+            }
             val pendingSaves = koinInject<PendingTaskSaves>()
             val subtaskTrees = koinInject<SubtaskTreeRegistry>()
             val hasAccount by appViewModel.hasAccount.collectAsState()
@@ -844,6 +856,14 @@ fun App(
                             },
                             onContinueWithoutSync = {
                                 appViewModel.continueWithoutSync()
+                            },
+                            onImportBackup = {
+                                reporting.logEvent(
+                                    AnalyticsEvents.ADD_ACCOUNT,
+                                    AnalyticsEvents.PARAM_SOURCE to "onboarding",
+                                    AnalyticsEvents.PARAM_SELECTION to "import_backup",
+                                )
+                                importViewModel?.import()
                             },
                             openLegalUrl = openUrl,
                             environments = environments,

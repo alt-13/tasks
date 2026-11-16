@@ -394,4 +394,7 @@
     <string name="mcp_tools_group_reminders">මතක් කිරීම්</string>
     <string name="mcp_copy">පිටපත් කරන්න</string>
     <string name="new_filter">නව පෙරණයක් සැකසීම</string>
+    <string name="import_summary_title">ප්‍රතිස්ථාපන සාරාංශය</string>
+    <string name="import_summary_message">%1$s ගොනුවේ %2$s අඩංගු වේ.\n\n%3$s ආනයනය කරන ලදී\n%4$s දැනටමත් පවතී\n%5$s දෝෂ සහිත විය</string>
+    <string name="import_progress_read">කියවීමේ කාර්යය %1$d…</string>
 </resources>

@@ -594,4 +594,9 @@
     <string name="name_your_price_blurb">Заплатите столько, сколько хотите, чтобы разблокировать темы, значки и эти расширенные функции синхронизации</string>
     <string name="upgrade">Улучшить</string>
     <string name="supporter_summary_no_price">Спасибо!</string>
+    <string name="import_summary_title">Восстановить сводку</string>
+    <string name="import_summary_message">Файл %1$s содержал %2$s.\n\n%3$s импортировано,\n%4$s уже существовуют,\n%5$s с ошибками</string>
+    <string name="import_progress_read">Чтение задачи %1$d…</string>
+    <string name="import_failed">Не удалось импортировать</string>
+    <string name="import_failed_message">Не удалось прочитать файл резервной копии</string>
 </resources>

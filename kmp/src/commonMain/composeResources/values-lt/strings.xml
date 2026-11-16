@@ -427,4 +427,7 @@
     <string name="mcp_tools_group_reminders">Priminimai</string>
     <string name="mcp_copy">Kopijuoti</string>
     <string name="new_filter">Sukurti naują filtrą</string>
+    <string name="import_summary_title">Atkurti suvestinę</string>
+    <string name="import_summary_message">Faile %1$s buvo %2$s.\n\n%3$s importuota,\n%4$s jau egzistuoja\n%5$s turėjo klaidų</string>
+    <string name="import_progress_read">Nuskaitoma užduotis %1$d…</string>
 </resources>

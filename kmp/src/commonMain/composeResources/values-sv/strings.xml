@@ -616,4 +616,9 @@
     <string name="mcp_copy">Kopiera</string>
     <string name="new_filter">Skapa ett nytt filter</string>
     <string name="subscription_required">Prenumeration krävs</string>
+    <string name="import_summary_title">Sammanfattning av återställningen</string>
+    <string name="import_summary_message">Filen %1$s innehöll %2$s.\n\n%3$s importerades,\n%4$s fanns redan\n%5$s innehöll fel</string>
+    <string name="import_progress_read">Läser uppgift %1$d…</string>
+    <string name="import_failed">Importeringen misslyckades</string>
+    <string name="import_failed_message">Det gick inte att läsa säkerhetskopian</string>
 </resources>

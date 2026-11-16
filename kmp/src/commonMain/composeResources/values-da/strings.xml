@@ -723,4 +723,9 @@
     <string name="subscription_ended_on">Udløbet %1$s</string>
     <string name="subscription_free_until">Gratis indtil %1$s, derefter %2$s</string>
     <string name="subscription_payment_failed">Betalingen mislykkedes. Opdater dit betalingskort</string>
+    <string name="import_summary_title">Gendan opsummering</string>
+    <string name="import_summary_message">Filen %1$s indeholdt %2$s.\n\n%3$s importeret\n%4$s findes allerede\n%5$s havde fejl</string>
+    <string name="import_progress_read">Indlæser opgave %1$d…</string>
+    <string name="import_failed">Import mislykkedes</string>
+    <string name="import_failed_message">Kunne ikke læse sikkerhedskopifil</string>
 </resources>

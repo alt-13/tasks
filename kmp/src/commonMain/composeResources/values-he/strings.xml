@@ -590,4 +590,9 @@
     <string name="mcp_copy">העתקה</string>
     <string name="new_filter">יצירת מסנן חדש</string>
     <string name="subscription_required">נדרש מינוי</string>
+    <string name="import_summary_title">סיכום שחזור</string>
+    <string name="import_summary_message">קובץ %1$s הכיל %2$s.\n\n%3$s יובאו,\n%4$s כבר קיימות\nב־%5$s היו שגיאות</string>
+    <string name="import_progress_read">נקראת משימה %1$d…</string>
+    <string name="import_failed">הייבוא נכשל</string>
+    <string name="import_failed_message">לא היה ניתן לקרוא קובץ גיבוי</string>
 </resources>

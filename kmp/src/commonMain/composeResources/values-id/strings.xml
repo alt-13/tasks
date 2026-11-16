@@ -668,4 +668,9 @@
     <string name="repeat_monthly_on_last_day">Setiap bulan pada hari terakhir</string>
     <string name="repeat_monthly_last_day">hari terakhir</string>
     <string name="subscription_required">Langganan diperlukan</string>
+    <string name="import_summary_title">Pulihkan ringkasan</string>
+    <string name="import_summary_message">Berkas %1$s berisi %2$s.\n\n%3$s diimpor,\n%4$s sudah ada\n%5$s memiliki kesalahan</string>
+    <string name="import_progress_read">Membaca tugas %1$d …</string>
+    <string name="import_failed">Impor gagal</string>
+    <string name="import_failed_message">Tidak dapat membaca file cadangan</string>
 </resources>

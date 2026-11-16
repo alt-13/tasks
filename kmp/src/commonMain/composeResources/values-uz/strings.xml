@@ -232,4 +232,9 @@
     <string name="sign_in">Kirish</string>
     <string name="not_signed_in">Tizimga kirmagan</string>
     <string name="logout_confirmation">%1$s hisobidan chiqishni xohlaysizmi?</string>
+    <string name="import_summary_title">Tiklash natijalari</string>
+    <string name="import_summary_message">%1$s faylida %2$s mavjud.\n\n%3$s yuklandi,\n%4$s allaqachon mavjud\n%5$s da xato chiqdi</string>
+    <string name="import_progress_read">%1$d-vazifa o'qilmoqda…</string>
+    <string name="import_failed">Yuklab bo'lmadi</string>
+    <string name="import_failed_message">Zaxira faylini o'qib bo'lmadi</string>
 </resources>

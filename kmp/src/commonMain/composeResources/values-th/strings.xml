@@ -358,4 +358,9 @@
     <string name="new_filter">สร้างตัวกรองข้อมูลใหม่</string>
     <string name="ok">ตกลง</string>
     <string name="cancel">ยกเลิก</string>
+    <string name="import_summary_title">เรียกคืนข้อมูลสรุป</string>
+    <string name="import_summary_message">แฟ้ม %1$s มี %2$s อักขระ [3] อักขระ และแฟ้ม [3]\n\nนําเข้า%3$s\n%4$s มีอยู่แล้ว\n%5$s มีข้อผิดพลาด%5$s</string>
+    <string name="import_progress_read">กำลังอ่านแผนงาน %1$d…</string>
+    <string name="import_failed">การนำเข้าล้มเหลว</string>
+    <string name="import_failed_message">ไม่สามารถอ่านไฟล์ที่สำรองได้</string>
 </resources>

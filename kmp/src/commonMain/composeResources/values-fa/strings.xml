@@ -203,4 +203,9 @@
     <string name="metadata_move">انتقال</string>
     <string name="mcp_copy">کپی</string>
     <string name="more_options">سایر گزینه‌ها</string>
+    <string name="import_summary_title">بازگرداندن خلاصه</string>
+    <string name="import_summary_message">فایل %1$s شامل%2$s است.\n\n%3$s بازیابی شد،\n%4$s از قبل وجود داشته\n%5$s ایراداتی داشت.</string>
+    <string name="import_progress_read">درحال خواندن تسک %1$d…</string>
+    <string name="import_failed">وارد کردن ناموفق بود</string>
+    <string name="import_failed_message">نتوانست فایل پشتیبان را بخواند</string>
 </resources>

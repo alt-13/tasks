@@ -723,4 +723,9 @@
     <string name="subscription_ended_on">Beëindigd per %1$s</string>
     <string name="subscription_free_until">Gratis tot %1$s, daarna %2$s</string>
     <string name="subscription_payment_failed">Betaling mislukt, betaalwijze bijwerken</string>
+    <string name="import_summary_title">Hersteloverzicht</string>
+    <string name="import_summary_message">Bestand %1$s bevat %2$s.\n\n%3$s geïmporteerd,\n%4$s bestaan al\n%5$s bevatten fouten</string>
+    <string name="import_progress_read">Taak %1$d lezen…</string>
+    <string name="import_failed">Import mislukt</string>
+    <string name="import_failed_message">Kon het backupbestand niet lezen</string>
 </resources>

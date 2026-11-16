@@ -6,6 +6,10 @@ import org.tasks.viewmodel.TasksAccountViewModel
 import org.tasks.viewmodel.GoogleTasksAccountViewModel
 import org.tasks.auth.PurchaseClaim
 import org.tasks.auth.TasksServerEnvironment
+import org.tasks.backup.BackupImportHooks
+import org.tasks.backup.BackupImporter
+import org.tasks.backup.ImportBackupViewModel
+import org.tasks.backup.SharedBackupImportHooks
 import org.tasks.billing.GitHubSponsorVerifier
 import org.tasks.billing.StripeCheckouts
 import org.tasks.billing.StripeClient
@@ -420,6 +424,8 @@ val coreModule: Module = module {
     factoryOf(::TaskSaver)
     factoryOf(::TaskMover)
     factoryOf(::SubtaskTreeWriter)
+    factoryOf(::BackupImporter)
+    factory<BackupImportHooks> { SharedBackupImportHooks(get()) }
     single { SubtaskTreeRegistry() }
     factory<DefaultListProvider> {
         val caldavDao = get<org.tasks.data.dao.CaldavDao>()
@@ -657,6 +663,7 @@ val coreModule: Module = module {
     }
     viewModelOf(::AppViewModel)
     viewModelOf(::AddAccountViewModel)
+    viewModelOf(::ImportBackupViewModel)
     viewModel {
         DrawerViewModel(
             filterProvider = get(),

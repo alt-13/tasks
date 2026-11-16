@@ -19,4 +19,6 @@
     <string name="DLG_delete_this_task_question">دەتەوێت ئەم ئەرکە بسڕیتەوە؟</string>
     <string name="action_open">بکەوە</string>
     <string name="new_filter">پاڵاوتنێک دروست بکە</string>
+    <string name="import_summary_title">پوختە وەک خۆی لێ بکەرەوە</string>
+    <string name="import_progress_read">ئەرکی %1$d دەخوێنرێتەوە…</string>
 </resources>

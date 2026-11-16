@@ -412,4 +412,7 @@
     <string name="mcp_tools_group_reminders">Lời nhắc</string>
     <string name="mcp_copy">Sao chép</string>
     <string name="new_filter">Tạo bộ lọc mới</string>
+    <string name="import_summary_title">Tóm tắt khôi phục</string>
+    <string name="import_summary_message">Tệp %1$s đã chứa %2$s.\n\n%3$s đã được nhập,\n%4$s đã tồn tại\n%5$s đã có lỗi</string>
+    <string name="import_progress_read">Đang đọc công việc %1$d…</string>
 </resources>

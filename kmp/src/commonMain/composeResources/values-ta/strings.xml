@@ -459,4 +459,7 @@
     <string name="mcp_tools_group_reminders">நினைவூட்டல்கள்</string>
     <string name="mcp_copy">நகலெடுக்கவும்</string>
     <string name="new_filter">புதிய வடிப்பானை உருவாக்கவும்</string>
+    <string name="import_summary_title">சுருக்கத்தை மீட்டமை</string>
+    <string name="import_summary_message">கோப்பு %1$s %2$s ஐக் கொண்டுள்ளது.\n\n%3$s இறக்குமதி செய்யப்பட்டன,\n%4$s கள் ஏற்கனவே உள்ளன\n%5$s பிழைகள் இருந்தன</string>
+    <string name="import_progress_read">%1$d வேலையைப் படிக்கிறது…</string>
 </resources>

@@ -478,4 +478,9 @@
     <string name="mcp_tools_group_reminders">Przypomnienia</string>
     <string name="mcp_copy">Kopiuj</string>
     <string name="new_filter">Stwórz nowy filtr</string>
+    <string name="import_summary_title">Podsumowanie odzyskiwania</string>
+    <string name="import_summary_message">Plik %1$s zawiera %2$s.\n\n%3$s zaimportowanych,\n%4$s już istnieje\n%5$s zawiera błędy</string>
+    <string name="import_progress_read">Czytanie zadania %1$d…</string>
+    <string name="import_failed">Import nie powiódł się</string>
+    <string name="import_failed_message">Nie udało się odczytać pliku kopii zapasowej</string>
 </resources>

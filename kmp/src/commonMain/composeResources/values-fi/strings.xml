@@ -474,4 +474,9 @@
     <string name="mcp_copy">Kopio</string>
     <string name="new_filter">Luo uusi suodatin</string>
     <string name="subscription_required">Tilaus vaaditaan</string>
+    <string name="import_summary_title">Palauta yhteenveto</string>
+    <string name="import_summary_message">Tiedosto %1$s sisälsi %2$s.\n\n%3$s tuotu,\n%4$s jo olemassa\n%5$s virhettä</string>
+    <string name="import_progress_read">Luetaan tehtävää %1$d…</string>
+    <string name="import_failed">Tuonti epäonnistui</string>
+    <string name="import_failed_message">Varmuuskopiota ei voitu lukea</string>
 </resources>

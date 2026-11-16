@@ -69,4 +69,7 @@
     <string name="customize_drawer_summary">Povuci i pusti za promjenu rasporeda u meniju</string>
     <string name="mcp_tools_group_reminders">Podsjetnici</string>
     <string name="more_options">Više opcija</string>
+    <string name="import_summary_title">Vrati sažetak</string>
+    <string name="import_summary_message">Fajl %1$s je sadržao %2$s.\n\n%3$s uvezeno,\n%4$s već postoje\n%5$s s greškama</string>
+    <string name="import_progress_read">Učitavanje zadatka %1$d…</string>
 </resources>

@@ -582,4 +582,9 @@
     <string name="mcp_copied">Copiato</string>
     <string name="mcp_hide">Nascondi</string>
     <string name="subscription_required">Richiede un abbonamento</string>
+    <string name="import_summary_title">Riepilogo del ripristino</string>
+    <string name="import_summary_message">Il file %1$s contiene %2$s.\n\n%3$s importate,\n%4$s già esistenti\n%5$s con errori</string>
+    <string name="import_progress_read">Lettura attività %1$d…</string>
+    <string name="import_failed">Importazione non riuscita</string>
+    <string name="import_failed_message">Impossibile leggere il file di backup</string>
 </resources>

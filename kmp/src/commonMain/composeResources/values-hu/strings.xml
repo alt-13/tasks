@@ -520,4 +520,9 @@
     <string name="mcp_copy">Másolás</string>
     <string name="new_filter">Új szűrő létrehozása</string>
     <string name="subscription_required">Előfizetés szükséges</string>
+    <string name="import_summary_title">Visszaállítás összesítése</string>
+    <string name="import_summary_message">A(z) %1$s file %2$s-t tartalmazott.\n\n%3$s importálva,\n%4$s már létezett\n%5$s hibás</string>
+    <string name="import_progress_read">%1$d feladat felolvasása…</string>
+    <string name="import_failed">Sikertelen importálás</string>
+    <string name="import_failed_message">A mentés fájlja nem olvasható</string>
 </resources>

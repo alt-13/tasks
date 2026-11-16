@@ -566,4 +566,9 @@
     <string name="mcp_copy">Copiar</string>
     <string name="new_filter">Criar novo filtro</string>
     <string name="subscription_required">Inscrição necessária</string>
+    <string name="import_summary_title">Resumo do restauro</string>
+    <string name="import_summary_message">O ficheiro %1$s continha %2$s\n\n%3$s importadas\n%4$s já existem,\n%5$s tinham erros</string>
+    <string name="import_progress_read">Lendo a tarefa %1$d…</string>
+    <string name="import_failed">Importação falhou</string>
+    <string name="import_failed_message">Erro ao ler ficheiro de backup</string>
 </resources>
