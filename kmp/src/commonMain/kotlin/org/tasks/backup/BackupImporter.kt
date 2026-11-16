@@ -7,6 +7,7 @@ import com.todoroo.astrid.service.Upgrade_15_13.Companion.canonicalized
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -33,6 +34,9 @@ import org.tasks.data.dao.TaskAttachmentDao
 import org.tasks.data.dao.TaskDao
 import org.tasks.data.dao.TaskListMetadataDao
 import org.tasks.data.dao.UserActivityDao
+import org.tasks.data.entity.Alarm
+import org.tasks.data.entity.Alarm.Companion.TYPE_RANDOM
+import org.tasks.data.entity.Alarm.Companion.TYPE_SNOOZE
 import org.tasks.data.entity.Attachment
 import org.tasks.data.entity.CaldavAccount
 import org.tasks.data.entity.CaldavAccount.Companion.TYPE_GOOGLE_TASKS
@@ -43,13 +47,17 @@ import org.tasks.data.entity.Geofence
 import org.tasks.data.entity.Place
 import org.tasks.data.entity.Tag
 import org.tasks.data.entity.TagData
+import org.tasks.data.entity.Task
 import org.tasks.data.entity.TaskAttachment
 import org.tasks.data.entity.TaskListMetadata
 import org.tasks.filters.LegacyFilterCriteria
 import org.tasks.kmp.org.tasks.themes.ColorProvider
 import org.tasks.preferences.AppPreferences
 import org.tasks.preferences.TasksPreferences
+import org.tasks.repeats.Recur
+import org.tasks.repeats.Until
 import org.tasks.themes.migrateLegacyIcon
+import org.tasks.time.DateTime
 
 /** Common port of Android's `TasksJsonImporter`. */
 class BackupImporter(
@@ -79,12 +87,20 @@ class BackupImporter(
         val result = ImportResult()
         val accountUuidMap = mutableMapOf<String, String>()
         val calendarUuidMap = mutableMapOf<String, String>()
+        val newPlaces = mutableSetOf<String>()
+        val placeRadius = mutableMapOf<String, Int>()
         try {
             val version = BackupJsonReader(openSource().buffer()).use {
-                importMetadata(it, accountUuidMap, calendarUuidMap)
+                importMetadata(it, accountUuidMap, calendarUuidMap, newPlaces)
             }
             BackupJsonReader(openSource().buffer()).use {
-                importTasks(it, onProgress, version, result, calendarUuidMap)
+                importTasks(it, onProgress, version, result, calendarUuidMap) { place, radius ->
+                    // like the old min(geofences.radius), and only for places this import added
+                    if (place in newPlaces) placeRadius[place] = minOf(radius, placeRadius[place] ?: radius)
+                }
+            }
+            placeRadius.forEach { (uid, radius) ->
+                locationDao.getByUid(uid)?.let { locationDao.update(it.copy(radius = radius)) }
             }
             if (version < LOCAL_TASKS_VERSION) {
                 taskMover.migrateLocalTasks()
@@ -118,8 +134,10 @@ class BackupImporter(
         reader: BackupJsonReader,
         accountUuidMap: MutableMap<String, String>,
         calendarUuidMap: MutableMap<String, String>,
+        newPlaces: MutableSet<String>,
     ): Int {
         val importedAccounts = mutableMapOf<String, CaldavAccount>()
+        val filters = mutableListOf<Filter>()
         var version = 0
         reader.readData { element ->
             when (element) {
@@ -128,6 +146,7 @@ class BackupImporter(
                 "places" -> reader.forEach<Place> { place ->
                     if (locationDao.getByUid(place.uid!!) == null) {
                         locationDao.insert(place.copy(icon = place.icon.migrateLegacyIcon()))
+                        newPlaces += place.uid!!
                     }
                 }
                 "tags" -> reader.forEach<TagData> { tagData ->
@@ -140,16 +159,9 @@ class BackupImporter(
                         )
                     }
                 }
+                // inserted after the pass, when calendarUuidMap is complete
                 "filters" -> reader.forEach<Filter> {
-                    val filter = if (version < LEGACY_FILTER_VERSION) LegacyFilterCriteria.rebuildFilter(it) else it
-                    if (filterDao.getByName(filter.title!!) == null) {
-                        filterDao.insert(
-                            filter.copy(
-                                color = themeToColor(version, filter.color ?: 0),
-                                icon = filter.icon.migrateLegacyIcon(),
-                            )
-                        )
-                    }
+                    filters += if (version < LEGACY_FILTER_VERSION) LegacyFilterCriteria.rebuildFilter(it) else it
                 }
                 "caldavAccounts" -> reader.forEach<CaldavAccount> { imported ->
                     val account = if (version < Upgrade_15_13.VERSION) imported.canonicalized() else imported
@@ -229,11 +241,29 @@ class BackupImporter(
                     STRING_PREFS.forEach { key -> prefs.importPref(key) { it } }
                     // a list preference on Android, so stored as a string
                     prefs.importPref(TasksPreferences.defaultRecurrenceFrom) { it.toIntOrNull() }
+                    // Android's default_list is the list shown at start. Its default_remote_list is the
+                    // list for new tasks, stored as a filter ("4:<uuid>"); the shared app stores the uuid.
+                    prefs.importPref(TasksPreferences.defaultOpenFilter, "default_list") { it }
+                    prefs.importPref(TasksPreferences.defaultList, "default_remote_list") { value ->
+                        value.split(":").takeIf { it.size == 2 && it[0] in LIST_FILTER_TYPES }?.get(1)
+                    }
                 }
                 "boolPrefs" -> reader.prefs<Boolean>().let { prefs ->
                     BOOLEAN_PREFS.forEach { key -> prefs.importPref(key) { it } }
                 }
                 else -> skip(reader, element)
+            }
+        }
+        filters.forEach { filter ->
+            if (filterDao.getByName(filter.title!!) == null) {
+                filterDao.insert(
+                    calendarUuidMap.entries.fold(filter) { f, (old, new) ->
+                        f.copy(sql = f.sql?.replace(old, new), values = f.values?.replace(old, new))
+                    }.copy(
+                        color = themeToColor(version, filter.color ?: 0),
+                        icon = filter.icon.migrateLegacyIcon(),
+                    )
+                )
             }
         }
         return version
@@ -245,6 +275,7 @@ class BackupImporter(
         version: Int,
         result: ImportResult,
         calendarUuidMap: Map<String, String>,
+        onGeofenceRadius: (place: String, radius: Int) -> Unit,
     ) {
         reader.readData { element ->
             when (element) {
@@ -255,7 +286,7 @@ class BackupImporter(
                         val backup = lenientJson.decodeFromString<TaskBackup>(rawJson)
                         result.taskCount++
                         onProgress?.invoke(result.taskCount)
-                        importTask(backup, version, rawJson, result, calendarUuidMap)
+                        importTask(backup, version, rawJson, result, calendarUuidMap, onGeofenceRadius)
                     }
                     reader.endArray()
                 }
@@ -283,8 +314,12 @@ class BackupImporter(
     private inline fun <reified T> BackupJsonReader.prefs(): Map<String, T> =
         lenientJson.decodeFromString(jsonString())
 
-    private suspend fun <T, V : Any> Map<String, T>.importPref(key: Preferences.Key<V>, convert: (T) -> V?) {
-        this[key.name]?.let(convert)?.let { tasksPreferences.set(key, it) }
+    private suspend fun <T, V : Any> Map<String, T>.importPref(
+        key: Preferences.Key<V>,
+        name: String = key.name,
+        convert: (T) -> V?,
+    ) {
+        this[name]?.let(convert)?.let { tasksPreferences.set(key, it) }
     }
 
     private fun skip(reader: BackupJsonReader, name: String) {
@@ -298,6 +333,7 @@ class BackupImporter(
         rawJson: String,
         result: ImportResult,
         calendarUuidMap: Map<String, String>,
+        onGeofenceRadius: (place: String, radius: Int) -> Unit,
     ) {
         val task = backup.task
         val perTaskDirty: Pair<Long, Long>? = when {
@@ -335,17 +371,44 @@ class BackupImporter(
             result.skipCount++
             return
         }
-        task.suppressRefresh()
-        task.suppressSync()
-        taskDao.createNew(task)
-        val taskId = task.id
         val skipAllDayAlarms = version < ALL_DAY_ALARMS_VERSION
                 && task.hasDueDate()
                 && !task.hasDueTime()
                 && !appPreferences.isDefaultDueTimeEnabled()
-        backup.alarms
-            ?.takeUnless { skipAllDayAlarms }
-            ?.map { it.copy(task = taskId) }
+        // Old backups hold fields the entities no longer have. Unlike Android, which upgrades the task
+        // after inserting it and saves only the ring flags, the task is upgraded before it's inserted.
+        val legacy = if (version < REPEAT_FROM_VERSION) lenientJson.parseToJsonElement(rawJson).jsonObject else null
+        val legacyTask = legacy?.get("task")?.jsonObject
+        val legacyAlarms = if (version < LEGACY_ALARMS_VERSION) {
+            legacyAlarms(task, legacyTask, skipAllDayAlarms).also {
+                // bit tests like the database migration; isNotifyModeFive is false while reminder bits are set
+                task.ringFlags = when {
+                    task.ringFlags and Task.NOTIFY_MODE_FIVE != 0 -> Task.NOTIFY_MODE_FIVE
+                    task.ringFlags and Task.NOTIFY_MODE_NONSTOP != 0 -> Task.NOTIFY_MODE_NONSTOP
+                    else -> 0
+                }
+            }
+        } else {
+            emptyList()
+        }
+        if (legacy != null) {
+            val recurrence = task.recurrence
+            task.repeatFrom = if (recurrence?.contains("FROM=COMPLETION") == true) {
+                Task.RepeatFrom.COMPLETION_DATE
+            } else {
+                Task.RepeatFrom.DUE_DATE
+            }
+            task.recurrence = recurrence
+                ?.replace(";?FROM=[^;]*".toRegex(), "")
+                ?.withUntil(legacyTask.long("repeatUntil"))
+        }
+        task.suppressRefresh()
+        task.suppressSync()
+        taskDao.createNew(task)
+        val taskId = task.id
+        (backup.alarms.orEmpty().takeUnless { skipAllDayAlarms }.orEmpty() + legacyAlarms)
+            .map { it.copy(task = taskId) }
+            .takeIf { it.isNotEmpty() }
             ?.let { alarmDao.insert(it) }
         // unlike Android, pictures from before 6.4 are kept as they are
         backup.comments?.forEach { comment ->
@@ -377,6 +440,7 @@ class BackupImporter(
                 address = location.address,
                 url = location.url,
                 phone = location.phone,
+                radius = location.radius.takeIf { it > 0 } ?: Place().radius,
             )
             locationDao.insert(place)
             locationDao.insert(
@@ -394,6 +458,12 @@ class BackupImporter(
         }
         backup.geofences?.forEach { geofence ->
             locationDao.insert(geofence.copy(task = taskId))
+        }
+        if (version < PLACE_RADIUS_VERSION) {
+            legacy?.get("geofences")?.jsonArray?.forEach { geofence ->
+                val place = geofence.jsonObject["place"]?.jsonPrimitive?.content ?: return@forEach
+                geofence.jsonObject.long("radius")?.let { onGeofenceRadius(place, it.toInt()) }
+            }
         }
         backup.attachments
             ?.mapNotNull { taskAttachmentDao.getAttachment(it.attachmentUid) }
@@ -429,6 +499,20 @@ class BackupImporter(
                     }
         }
 
+    /** Alarms that backups before 12.4 stored as ring flags and task columns. */
+    private fun legacyAlarms(task: Task, json: JsonObject?, skipAllDayAlarms: Boolean): List<Alarm> = buildList {
+        if (!skipAllDayAlarms) {
+            // Upgrade_14_11.fromLegacyFlags, without alarms for dates the task doesn't have
+            val flags = task.ringFlags
+            if (flags and Task.NOTIFY_AT_START != 0 && task.hasStartDate()) add(Alarm.whenStarted(0))
+            if (flags and Task.NOTIFY_AT_DEADLINE != 0 && task.hasDueDate()) add(Alarm.whenDue(0))
+            if (flags and Task.NOTIFY_AFTER_DEADLINE != 0 && task.hasDueDate()) add(Alarm.whenOverdue(0))
+        }
+        // Gson wrote the Java field names before May 2020 and the Kotlin names after
+        json.long("reminderPeriod", "notifications")?.let { add(Alarm(time = it, type = TYPE_RANDOM)) }
+        json.long("reminderSnooze", "snoozeTime")?.let { add(Alarm(time = it, type = TYPE_SNOOZE)) }
+    }
+
     private suspend fun findTagData(uid: String, name: String): TagData? =
         tagDataDao.getByUuid(uid) ?: tagDataDao.getTagByName(name)
 
@@ -448,10 +532,13 @@ class BackupImporter(
         private const val ALL_DAY_ALARMS_VERSION = 141300 // Upgrade_14_13.VERSION
         private const val LEGACY_COLOR_VERSION = 675 // Upgrader.V8_2
         private const val LOCAL_TASKS_VERSION = 90600 // Upgrader.V9_6
+        private const val LEGACY_ALARMS_VERSION = 120400 // Upgrader.V12_4
+        private const val PLACE_RADIUS_VERSION = 120601 // Upgrader.V12_6
+        private const val REPEAT_FROM_VERSION = 120800 // Upgrader.V12_8
+        private val LIST_FILTER_TYPES = listOf("3", "4") // FilterPreferenceCodec.TYPE_GOOGLE_TASKS, TYPE_CALDAV
 
         // Android preferences that the shared app stores under the same name and type.
-        // Skipped: install details, debug_pro, and default_list, which is the list shown at
-        // start on Android but the list for new tasks in the shared app.
+        // Skipped: install details and debug_pro. default_list is mapped by meaning in stringPrefs.
         private val STRING_PREFS = listOf(
             TasksPreferences.defaultTags,
             TasksPreferences.defaultRecurrence,
@@ -485,6 +572,21 @@ class BackupImporter(
         } catch (e: Exception) {
             Logger.w(e, tag = TAG) { "Failed to parse lastSync values from backup" }
             emptyList()
+        }
+
+        private fun JsonObject?.long(vararg names: String): Long? =
+            names.firstNotNullOfOrNull { this?.get(it)?.jsonPrimitive?.longOrNull }?.takeIf { it > 0 }
+
+        /** Folds a pre-12.8 `repeatUntil` into the RRULE, like `MIGRATION_84_85`. */
+        private fun String.withUntil(until: Long?): String {
+            if (until == null) return this
+            val date = DateTime(until)
+            return try {
+                Recur.parse(this).copy(until = Until.Date(date.year, date.monthOfYear, date.dayOfMonth)).toString()
+            } catch (e: Exception) {
+                Logger.w(e, tag = TAG) { "Failed to add repeatUntil to $this" }
+                this
+            }
         }
 
         /** Keep in sync with `CommonMigrations.MIGRATION_92_93` */

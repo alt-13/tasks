@@ -15,6 +15,9 @@ import org.tasks.InMemoryDataStore
 import org.tasks.caldav.FileStorage
 import org.tasks.caldav.VtodoCache
 import org.tasks.data.TaskMover
+import org.tasks.data.entity.Alarm.Companion.TYPE_RANDOM
+import org.tasks.data.entity.Alarm.Companion.TYPE_REL_END
+import org.tasks.data.entity.Alarm.Companion.TYPE_SNOOZE
 import org.tasks.data.entity.CaldavAccount
 import org.tasks.data.entity.CaldavAccount.Companion.TYPE_CALDAV
 import org.tasks.data.entity.CaldavAccount.Companion.TYPE_GOOGLE_TASKS
@@ -28,6 +31,7 @@ import org.tasks.data.entity.Task
 import org.tasks.kmp.org.tasks.themes.ColorProvider
 import org.tasks.preferences.AppPreferences
 import org.tasks.preferences.TasksPreferences
+import org.tasks.time.ONE_DAY
 
 class BackupImporterTest : DatabaseTest() {
     @get:Rule val folder = TemporaryFolder()
@@ -271,7 +275,8 @@ class BackupImporterTest : DatabaseTest() {
         import(
             """{"version":$CURRENT,"data":{"intPrefs":{"theme_color":-769226,"install_version":120000},""" +
                 """"longPrefs":{"install_date":1},""" +
-                """"stringPrefs":{"default_tags":"t1,t2","default_recurrence_from":"1","default_list":"4:cal-1"},""" +
+                """"stringPrefs":{"default_tags":"t1,t2","default_recurrence_from":"1","default_list":"4:cal-1",""" +
+                """"default_remote_list":"4:cal-2"},""" +
                 """"boolPrefs":{"markdown":true,"p_tags_enabled":false,"debug_pro":true},"setPrefs":{"p_x":["1"]}}}"""
         )
 
@@ -279,7 +284,8 @@ class BackupImporterTest : DatabaseTest() {
         assertEquals("t1,t2", tasksPreferences.get(TasksPreferences.defaultTags, ""))
         assertEquals(1, tasksPreferences.get(TasksPreferences.defaultRecurrenceFrom, 0))
         assertEquals(true, tasksPreferences.get(TasksPreferences.markdown, false))
-        assertEquals("", tasksPreferences.get(TasksPreferences.defaultList, ""))
+        assertEquals("4:cal-1", tasksPreferences.get(TasksPreferences.defaultOpenFilter, ""))
+        assertEquals("cal-2", tasksPreferences.get(TasksPreferences.defaultList, ""))
         assertEquals(0, tasksPreferences.get(TasksPreferences.installVersion, 0))
         assertEquals(0L, tasksPreferences.get(TasksPreferences.installDate, 0L))
         assertEquals(false, tasksPreferences.get(TasksPreferences.debugPro, false))
@@ -330,6 +336,60 @@ class BackupImporterTest : DatabaseTest() {
             """{"uri":"content://org.tasks/attachments/list.jpg"}""",
             db.userActivityDao().getComments(task.id).single().picture,
         )
+    }
+
+    @Test
+    fun upgradesRemindersAndRepeatsFromBefore12_4() = runBlocking {
+        val flags = Task.NOTIFY_AT_START or Task.NOTIFY_AT_DEADLINE or Task.NOTIFY_AFTER_DEADLINE or Task.NOTIFY_MODE_FIVE
+        import(
+            """{"version":120300,"data":{"tasks":[{"task":{"title":"Old","dueDate":1647349200000,"reminderFlags":$flags,""" +
+                """"reminderPeriod":3600000,"reminderSnooze":1647340000000,""" +
+                """"recurrence":"RRULE:FREQ=WEEKLY;INTERVAL=1;FROM=COMPLETION","repeatUntil":1648814400000,""" +
+                """"remoteId":"uuid-1"},"alarms":[]}]}}"""
+        )
+
+        val task = taskDao.getAll().single()
+        assertEquals(Task.NOTIFY_MODE_FIVE, task.ringFlags)
+        assertEquals(Task.RepeatFrom.COMPLETION_DATE, task.repeatFrom)
+        assertEquals("FREQ=WEEKLY;UNTIL=20220401;INTERVAL=1", task.recurrence)
+        // no start date, so no alarm when started
+        assertEquals(
+            listOf(TYPE_REL_END to 0L, TYPE_REL_END to ONE_DAY, TYPE_RANDOM to 3600000L, TYPE_SNOOZE to 1647340000000L),
+            db.alarmDao().getAlarms(task.id).map { it.type to it.time },
+        )
+    }
+
+    @Test
+    fun savesRepeatFromBefore12_8() = runBlocking {
+        insertLocalList()
+        import(BACKUP_V491)
+
+        val task = taskDao.getAll().single { it.title == "Call mom" }
+        assertEquals(Task.RepeatFrom.COMPLETION_DATE, task.repeatFrom)
+        assertEquals("RRULE:FREQ=WEEKLY;INTERVAL=1", task.recurrence)
+    }
+
+    @Test
+    fun movesGeofenceRadiusToPlace() = runBlocking {
+        import(BACKUP_V111201)
+
+        assertEquals(100, db.locationDao().getByUid("b7e0c3a2-5c1d-4e3f-9a8b-7c6d5e4f3a2b")!!.radius)
+    }
+
+    @Test
+    fun filterValuesFollowRemappedCalendar() = runBlocking {
+        setup(account("acc-B"), calendar("acc-B", "cal-B"))
+
+        import(
+            """{"version":$CURRENT,"data":{"filters":[{"title":"In list","sql":"WHERE caldav_tasks.cd_calendar='cal-A'",""" +
+                """"values":"{\"cal-A\":1}"}],""" +
+                """"caldavAccounts":${Json.encodeToString(listOf(account("acc-A")))},""" +
+                """"caldavCalendars":${Json.encodeToString(listOf(calendar("acc-A", "cal-A")))}}}"""
+        )
+
+        val filter = db.filterDao().getFilters().single()
+        assertEquals("WHERE caldav_tasks.cd_calendar='cal-B'", filter.sql)
+        assertEquals("""{"cal-B":1}""", filter.values)
     }
 
     companion object {
