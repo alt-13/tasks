@@ -1,8 +1,6 @@
 name: Run automated checks
 
 on:
-  push:
-    branches: [ios/e2c-android-common-importer]
   pull_request:
   workflow_call:
 
