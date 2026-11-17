@@ -18,6 +18,7 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verifyNoInteractions
 import org.tasks.backup.ImportBackupViewModel.State
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -29,6 +30,7 @@ class ImportBackupViewModelTest {
         override suspend fun <T> pick(read: suspend (String, () -> Source) -> T): T? =
             if (picked) read("backup.json") { Buffer() } else null
     }
+    private val openedFiles = OpenedBackupFiles()
 
     @Before
     fun setUp() = Dispatchers.setMain(dispatcher)
@@ -40,7 +42,7 @@ class ImportBackupViewModelTest {
     fun showsResultOfImport() = runTest(dispatcher) {
         val result = BackupImporter.ImportResult()
         val importer = mock<BackupImporter> { onBlocking { importTasks(any(), anyOrNull()) } doReturn result }
-        val viewModel = ImportBackupViewModel(picker, importer)
+        val viewModel = ImportBackupViewModel(picker, importer, openedFiles)
 
         viewModel.import()
         advanceUntilIdle()
@@ -51,7 +53,7 @@ class ImportBackupViewModelTest {
     @Test
     fun staysIdleWhenPickerIsCancelled() = runTest(dispatcher) {
         picked = false
-        val viewModel = ImportBackupViewModel(picker, mock())
+        val viewModel = ImportBackupViewModel(picker, mock(), openedFiles)
 
         viewModel.import()
         advanceUntilIdle()
@@ -64,11 +66,43 @@ class ImportBackupViewModelTest {
         val importer = mock<BackupImporter> {
             onBlocking { importTasks(any(), anyOrNull()) } doThrow IllegalStateException()
         }
-        val viewModel = ImportBackupViewModel(picker, importer)
+        val viewModel = ImportBackupViewModel(picker, importer, openedFiles)
 
         viewModel.import()
         advanceUntilIdle()
 
         assertEquals(State.Failed, viewModel.state.value)
+    }
+
+    @Test
+    fun importsOpenedFileAfterConfirmation() = runTest(dispatcher) {
+        val result = BackupImporter.ImportResult()
+        val importer = mock<BackupImporter> { onBlocking { importTasks(any(), anyOrNull()) } doReturn result }
+        // opened before the view model exists, like a cold launch
+        openedFiles.open(picker)
+        val viewModel = ImportBackupViewModel(picker, importer, openedFiles)
+        advanceUntilIdle()
+
+        assertEquals(State.Confirm("backup.json"), viewModel.state.value)
+        verifyNoInteractions(importer)
+
+        viewModel.confirm()
+        advanceUntilIdle()
+
+        assertEquals(State.Done("backup.json", result), viewModel.state.value)
+    }
+
+    @Test
+    fun doesNotImportDeclinedFile() = runTest(dispatcher) {
+        val importer = mock<BackupImporter>()
+        val viewModel = ImportBackupViewModel(picker, importer, openedFiles)
+        openedFiles.open(picker)
+        advanceUntilIdle()
+
+        viewModel.dismiss()
+        advanceUntilIdle()
+
+        assertEquals(State.Idle, viewModel.state.value)
+        verifyNoInteractions(importer)
     }
 }

@@ -9,6 +9,7 @@ import org.tasks.auth.TasksServerEnvironment
 import org.tasks.backup.BackupImportHooks
 import org.tasks.backup.BackupImporter
 import org.tasks.backup.ImportBackupViewModel
+import org.tasks.backup.OpenedBackupFiles
 import org.tasks.backup.SharedBackupImportHooks
 import org.tasks.billing.GitHubSponsorVerifier
 import org.tasks.billing.StripeCheckouts
@@ -426,6 +427,7 @@ val coreModule: Module = module {
     factoryOf(::SubtaskTreeWriter)
     factoryOf(::BackupImporter)
     factory<BackupImportHooks> { SharedBackupImportHooks(get()) }
+    single { OpenedBackupFiles() }
     single { SubtaskTreeRegistry() }
     factory<DefaultListProvider> {
         val caldavDao = get<org.tasks.data.dao.CaldavDao>()

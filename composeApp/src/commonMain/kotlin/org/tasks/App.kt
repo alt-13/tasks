@@ -347,7 +347,7 @@ fun App(
             }
             importViewModel?.let {
                 val importState by it.state.collectAsState()
-                ImportBackupDialog(importState, onDismiss = it::dismiss)
+                ImportBackupDialog(importState, onConfirm = it::confirm, onDismiss = it::dismiss)
             }
             val pendingSaves = koinInject<PendingTaskSaves>()
             val subtaskTrees = koinInject<SubtaskTreeRegistry>()

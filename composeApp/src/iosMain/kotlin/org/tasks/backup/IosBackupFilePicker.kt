@@ -3,9 +3,6 @@ package org.tasks.backup
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import okio.FileSystem
-import okio.Path.Companion.toPath
-import okio.SYSTEM
 import okio.Source
 import org.tasks.extensions.keyWindow
 import platform.Foundation.NSURL
@@ -22,17 +19,7 @@ class IosBackupFilePicker : BackupFilePicker {
 
     override suspend fun <T> pick(read: suspend (name: String, openSource: () -> Source) -> T): T? {
         val url = withContext(Dispatchers.Main) { present() } ?: return null
-        val path = url.path ?: return null
-        val name = url.lastPathComponent ?: path
-        // a picked file outside the sandbox can only be read between start and stop
-        val accessing = url.startAccessingSecurityScopedResource()
-        try {
-            return read(name) { FileSystem.SYSTEM.source(path.toPath()) }
-        } finally {
-            if (accessing) {
-                url.stopAccessingSecurityScopedResource()
-            }
-        }
+        return readBackup(url, read)
     }
 
     private suspend fun present(): NSURL? = suspendCancellableCoroutine { continuation ->

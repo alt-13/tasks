@@ -17,6 +17,7 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.tasks.backup.ImportBackupViewModel.State
 import tasks.kmp.generated.resources.Res
+import tasks.kmp.generated.resources.cancel
 import tasks.kmp.generated.resources.import_failed
 import tasks.kmp.generated.resources.import_failed_message
 import tasks.kmp.generated.resources.import_progress_read
@@ -26,9 +27,9 @@ import tasks.kmp.generated.resources.ok
 import tasks.kmp.generated.resources.returning_user_import_backup
 import tasks.kmp.generated.resources.task_count
 
-/** Progress and result of a backup import, like Android's `ImportTasksDialog`. */
+/** Confirmation, progress and result of a backup import, like Android's `ImportTasksDialog`. */
 @Composable
-fun ImportBackupDialog(state: State, onDismiss: () -> Unit) {
+fun ImportBackupDialog(state: State, onConfirm: () -> Unit, onDismiss: () -> Unit) {
     if (state == State.Idle) return
     val done = state !is State.Importing
     AlertDialog(
@@ -68,12 +69,20 @@ fun ImportBackupDialog(state: State, onDismiss: () -> Unit) {
                         tasks(0),
                     )
                 )
+                is State.Confirm -> Text(state.file)
                 else -> Text(stringResource(Res.string.import_failed_message))
             }
         },
         confirmButton = {
             if (done) {
-                TextButton(onClick = onDismiss) { Text(stringResource(Res.string.ok)) }
+                TextButton(onClick = if (state is State.Confirm) onConfirm else onDismiss) {
+                    Text(stringResource(Res.string.ok))
+                }
+            }
+        },
+        dismissButton = {
+            if (state is State.Confirm) {
+                TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
             }
         },
     )
