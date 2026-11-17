@@ -7,7 +7,6 @@ import okio.SYSTEM
 import okio.Source
 import org.koin.mp.KoinPlatform
 import org.tasks.ensureStarted
-import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
 
 private const val TAG = "OpenBackupFile"
@@ -28,8 +27,9 @@ private class OpenedBackupFile(private val url: NSURL) : BackupFilePicker {
             readBackup(url, read)
         } finally {
             // copies iOS made for us (share sheet, AirDrop) would pile up otherwise
-            if (url.path?.contains("/Documents/Inbox/") == true) {
-                NSFileManager.defaultManager.removeItemAtURL(url, null)
+            url.path?.takeIf { it.contains("/Documents/Inbox/") }?.let {
+                runCatching { FileSystem.SYSTEM.delete(it.toPath()) }
+                    .onFailure { e -> Logger.e(e, tag = TAG) { "Failed to delete $it" } }
             }
         }
 }
