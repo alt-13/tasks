@@ -22,7 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import org.tasks.R
-import org.tasks.backup.TasksJsonImporter
+import org.tasks.backup.BackupImporter
 
 @Composable
 fun ImportTasksDialog(
@@ -97,7 +97,7 @@ fun ImportTasksDialog(
     )
 }
 
-private fun formatSummary(context: Context, result: TasksJsonImporter.ImportResult): String {
+private fun formatSummary(context: Context, result: BackupImporter.ImportResult): String {
     val resources = context.resources
     return resources.getString(
         R.string.import_summary_message,

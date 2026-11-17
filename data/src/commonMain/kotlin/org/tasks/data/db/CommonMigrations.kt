@@ -13,7 +13,7 @@ object CommonMigrations {
             connection.execSQL("CREATE TABLE IF NOT EXISTS `task_dirty` (`caldav_task_id` INTEGER NOT NULL PRIMARY KEY, `dirty_version` INTEGER NOT NULL DEFAULT 0, `synced_version` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(`caldav_task_id`) REFERENCES `caldav_tasks`(`cd_id`) ON UPDATE NO ACTION ON DELETE CASCADE)")
             connection.execSQL("CREATE INDEX IF NOT EXISTS `index_task_dirty_dirty_version_synced_version` ON `task_dirty` (`dirty_version`, `synced_version`)")
             // The CASE below is the SQL mirror of
-            // TasksJsonImporter.reconstructDirtyVersion(lastSync, modified) — keep the two in sync.
+            // BackupImporter.reconstructDirtyVersion(lastSync, modified) — keep the two in sync.
             connection.execSQL("""
                 INSERT INTO `task_dirty` (`caldav_task_id`, `dirty_version`, `synced_version`)
                 SELECT ct.`cd_id`,

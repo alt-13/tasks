@@ -21,6 +21,8 @@ import org.tasks.LocalBroadcastManager
 import com.todoroo.astrid.gcal.GCalHelper
 import com.todoroo.astrid.repeats.RepeatTaskHelper
 import org.tasks.analytics.Firebase
+import org.tasks.backup.AndroidBackupImportHooks
+import org.tasks.backup.BackupImporter
 import org.tasks.audio.SoundPlayer
 import org.tasks.calendars.CalendarHelper
 import org.tasks.filters.CaldavListCache
@@ -538,6 +540,31 @@ class ApplicationModule {
         backgroundWork: BackgroundWork,
         caldavDao: CaldavDao,
     ) = TaskSaver(taskDao, refreshBroadcaster, notifier, locationService, timerPlugin, backgroundWork, caldavDao)
+
+    @Provides
+    fun providesBackupImporter(
+        tagDataDao: TagDataDao,
+        userActivityDao: UserActivityDao,
+        taskDao: TaskDao,
+        dirtyDao: DirtyDao,
+        locationDao: LocationDao,
+        refreshBroadcaster: RefreshBroadcaster,
+        alarmDao: AlarmDao,
+        tagDao: TagDao,
+        filterDao: FilterDao,
+        taskAttachmentDao: TaskAttachmentDao,
+        caldavDao: CaldavDao,
+        appPreferences: AppPreferences,
+        taskListMetadataDao: TaskListMetadataDao,
+        vtodoCache: VtodoCache,
+        analytics: Analytics,
+        hooks: AndroidBackupImportHooks,
+        taskMover: org.tasks.data.TaskMover,
+    ) = BackupImporter(
+        tagDataDao, userActivityDao, taskDao, dirtyDao, locationDao, refreshBroadcaster, alarmDao, tagDao,
+        filterDao, taskAttachmentDao, caldavDao, appPreferences, taskListMetadataDao, vtodoCache, analytics,
+        hooks, taskMover,
+    )
 
     @Provides
     fun providesTimerPlugin(

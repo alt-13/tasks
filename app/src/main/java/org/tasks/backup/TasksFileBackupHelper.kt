@@ -4,13 +4,13 @@ import android.app.backup.BackupDataInputStream
 import android.app.backup.BackupDataOutput
 import android.app.backup.FileBackupHelper
 import android.content.Context
-import android.net.Uri
 import android.os.ParcelFileDescriptor
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.runBlocking
+import okio.source
 import org.tasks.LocalBroadcastManager
 import org.tasks.R
 import org.tasks.preferences.Preferences
@@ -24,7 +24,7 @@ class TasksFileBackupHelper(
     @EntryPoint
     @InstallIn(SingletonComponent::class)
     internal interface TasksFileBackupHelperEntryPoint {
-        val tasksJsonImporter: TasksJsonImporter
+        val backupImporter: BackupImporter
         val preferences: Preferences
         val localBroadcastManager: LocalBroadcastManager
     }
@@ -65,7 +65,7 @@ class TasksFileBackupHelper(
                         it.copyTo(copy, overwrite = true)
                         runBlocking {
                             Timber.d("Restoring ${it.absolutePath}")
-                            hilt.tasksJsonImporter.importTasks(context, Uri.fromFile(copy), null)
+                            hilt.backupImporter.importTasks({ copy.source() })
                         }
                     } finally {
                         copy.delete()

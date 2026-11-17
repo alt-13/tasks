@@ -1,6 +1,5 @@
 package org.tasks.backup
 
-import androidx.datastore.preferences.core.Preferences
 import co.touchlab.kermit.Logger
 import com.todoroo.astrid.service.Upgrade_15_13
 import com.todoroo.astrid.service.Upgrade_15_13.Companion.canonicalized
@@ -53,13 +52,12 @@ import org.tasks.data.entity.TaskListMetadata
 import org.tasks.filters.LegacyFilterCriteria
 import org.tasks.kmp.org.tasks.themes.ColorProvider
 import org.tasks.preferences.AppPreferences
-import org.tasks.preferences.TasksPreferences
 import org.tasks.repeats.Recur
 import org.tasks.repeats.Until
 import org.tasks.themes.migrateLegacyIcon
 import org.tasks.time.DateTime
 
-/** Common port of Android's `TasksJsonImporter`. */
+/** Imports a Tasks.org JSON backup. Platform differences are in [BackupImportHooks]. */
 class BackupImporter(
     private val tagDataDao: TagDataDao,
     private val userActivityDao: UserActivityDao,
@@ -76,7 +74,7 @@ class BackupImporter(
     private val taskListMetadataDao: TaskListMetadataDao,
     private val vtodoCache: VtodoCache,
     private val analytics: Analytics,
-    private val tasksPreferences: TasksPreferences,
+    private val hooks: BackupImportHooks,
     private val taskMover: TaskMover,
 ) {
     /** [openSource] is called twice: the backup is read once for metadata and once for tasks. */
@@ -102,6 +100,7 @@ class BackupImporter(
             placeRadius.forEach { (uid, radius) ->
                 locationDao.getByUid(uid)?.let { locationDao.update(it.copy(radius = radius)) }
             }
+            hooks.afterImport(version)
             if (version < LOCAL_TASKS_VERSION) {
                 taskMover.migrateLocalTasks()
             }
@@ -236,21 +235,8 @@ class BackupImporter(
                         )
                     }
                 }
-                "intPrefs" -> reader.prefs<Int>().importPref(TasksPreferences.themeColor) { themeToColor(version, it) }
-                "stringPrefs" -> reader.prefs<String>().let { prefs ->
-                    STRING_PREFS.forEach { key -> prefs.importPref(key) { it } }
-                    // a list preference on Android, so stored as a string
-                    prefs.importPref(TasksPreferences.defaultRecurrenceFrom) { it.toIntOrNull() }
-                    // Android's default_list is the list shown at start. Its default_remote_list is the
-                    // list for new tasks, stored as a filter ("4:<uuid>"); the shared app stores the uuid.
-                    prefs.importPref(TasksPreferences.defaultOpenFilter, "default_list") { it }
-                    prefs.importPref(TasksPreferences.defaultList, "default_remote_list") { value ->
-                        value.split(":").takeIf { it.size == 2 && it[0] in LIST_FILTER_TYPES }?.get(1)
-                    }
-                }
-                "boolPrefs" -> reader.prefs<Boolean>().let { prefs ->
-                    BOOLEAN_PREFS.forEach { key -> prefs.importPref(key) { it } }
-                }
+                "intPrefs", "longPrefs", "stringPrefs", "boolPrefs", "setPrefs" ->
+                    hooks.importPreferences(element, reader.jsonString(), version)
                 else -> skip(reader, element)
             }
         }
@@ -309,17 +295,6 @@ class BackupImporter(
             }
         }
         endObject()
-    }
-
-    private inline fun <reified T> BackupJsonReader.prefs(): Map<String, T> =
-        lenientJson.decodeFromString(jsonString())
-
-    private suspend fun <T, V : Any> Map<String, T>.importPref(
-        key: Preferences.Key<V>,
-        name: String = key.name,
-        convert: (T) -> V?,
-    ) {
-        this[name]?.let(convert)?.let { tasksPreferences.set(key, it) }
     }
 
     private fun skip(reader: BackupJsonReader, name: String) {
@@ -410,9 +385,11 @@ class BackupImporter(
             .map { it.copy(task = taskId) }
             .takeIf { it.isNotEmpty() }
             ?.let { alarmDao.insert(it) }
-        // unlike Android, pictures from before 6.4 are kept as they are
         backup.comments?.forEach { comment ->
             comment.targetId = task.uuid
+            if (version < LEGACY_PICTURE_VERSION) {
+                comment.picture = hooks.legacyPicture(comment.picture)
+            }
             userActivityDao.createNew(comment)
         }
         backup.google?.forEachIndexed { index, googleTask ->
@@ -516,9 +493,6 @@ class BackupImporter(
     private suspend fun findTagData(uid: String, name: String): TagData? =
         tagDataDao.getByUuid(uid) ?: tagDataDao.getTagByName(name)
 
-    private fun themeToColor(version: Int, color: Int) =
-        if (version < LEGACY_COLOR_VERSION) ColorProvider.legacyColor(color) else color
-
     class ImportResult {
         var taskCount = 0
         var importCount = 0
@@ -531,36 +505,13 @@ class BackupImporter(
         private const val LEGACY_FILTER_VERSION = 130200 // Upgrade_13_2.VERSION
         private const val ALL_DAY_ALARMS_VERSION = 141300 // Upgrade_14_13.VERSION
         private const val LEGACY_COLOR_VERSION = 675 // Upgrader.V8_2
+        private const val LEGACY_PICTURE_VERSION = 546 // Upgrader.V6_4
         private const val LOCAL_TASKS_VERSION = 90600 // Upgrader.V9_6
         private const val LEGACY_ALARMS_VERSION = 120400 // Upgrader.V12_4
         private const val PLACE_RADIUS_VERSION = 120601 // Upgrader.V12_6
         private const val REPEAT_FROM_VERSION = 120800 // Upgrader.V12_8
-        private val LIST_FILTER_TYPES = listOf("3", "4") // FilterPreferenceCodec.TYPE_GOOGLE_TASKS, TYPE_CALDAV
-
-        // Android preferences that the shared app stores under the same name and type.
-        // Skipped: install details and debug_pro. default_list is mapped by meaning in stringPrefs.
-        private val STRING_PREFS = listOf(
-            TasksPreferences.defaultTags,
-            TasksPreferences.defaultRecurrence,
-            TasksPreferences.defaultLocation,
-            TasksPreferences.lastViewedList,
-        )
-        private val BOOLEAN_PREFS = listOf(
-            TasksPreferences.markdown,
-            TasksPreferences.filtersEnabled,
-            TasksPreferences.showTodayFilter,
-            TasksPreferences.showRecentlyModifiedFilter,
-            TasksPreferences.tagsEnabled,
-            TasksPreferences.tagsHideUnused,
-            TasksPreferences.placesEnabled,
-            TasksPreferences.placesHideUnused,
-            TasksPreferences.openLastViewedList,
-            TasksPreferences.dynamicColor,
-            TasksPreferences.bundleNotifications,
-            TasksPreferences.wearableNotifications,
-            TasksPreferences.collectStatistics,
-            TasksPreferences.localListBannerDismissed,
-        )
+        internal fun themeToColor(version: Int, color: Int) =
+            if (version < LEGACY_COLOR_VERSION) ColorProvider.legacyColor(color) else color
 
         private fun lastSyncValues(rawJson: String, key: String): List<Long?> = try {
             lenientJson.parseToJsonElement(rawJson).jsonObject[key]?.jsonArray

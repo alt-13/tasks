@@ -177,7 +177,7 @@ class BackupJsonReaderTest {
         var setPrefs = emptyMap<String, Set<String>>()
     }
 
-    // Walks the file the same way TasksJsonImporter does, decoding every section it imports.
+    // Walks the file the same way BackupImporter does, decoding every section it imports.
     private fun readBackup(json: String) = Backup().apply {
         reader(json).use { reader ->
             reader.beginObject()

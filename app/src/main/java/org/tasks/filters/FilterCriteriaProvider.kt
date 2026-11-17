@@ -10,13 +10,11 @@ import com.todoroo.astrid.core.CriterionInstance
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.tasks.R
 import org.tasks.Strings
-import org.tasks.activities.FilterSettingsActivity.Companion.sql
 import org.tasks.data.dao.CaldavDao
 import org.tasks.data.dao.TagDataDao
 import org.tasks.data.dao.TaskDao.TaskCriteria.activeAndVisible
 import org.tasks.data.entity.Alarm
 import org.tasks.data.entity.CaldavTask
-import org.tasks.data.entity.Filter
 import org.tasks.data.entity.Tag
 import org.tasks.data.entity.TagData
 import org.tasks.data.entity.Task
@@ -40,15 +38,6 @@ class FilterCriteriaProvider @Inject constructor(
     private val caldavDao: CaldavDao
 ) {
     private val r = context.resources
-
-    suspend fun rebuildFilter(filter: Filter): Filter {
-        val serialized = filter.criterion?.takeIf { it.isNotBlank() }
-        val criterion = fromString(serialized)
-        return filter.copy(
-            sql = criterion.sql,
-            criterion = CriterionInstance.serialize(criterion),
-        )
-    }
 
     suspend fun fromString(criterion: String?): List<CriterionInstance> {
         if (criterion.isNullOrBlank()) {

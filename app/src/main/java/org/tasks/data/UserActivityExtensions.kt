@@ -18,7 +18,7 @@ fun UserActivity.convertPictureUri() {
     setPicture(getLegacyPictureUri(picture))
 }
 
-private fun getLegacyPictureUri(value: String?): Uri? {
+internal fun getLegacyPictureUri(value: String?): Uri? {
     return try {
         if (value.isNullOrBlank()) {
             return null

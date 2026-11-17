@@ -17,13 +17,15 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.tasks.backup.TasksJsonImporter
+import okio.source
+import org.tasks.R
+import org.tasks.backup.BackupImporter
 import javax.inject.Inject
 
 @HiltViewModel
 class ImportTasksViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
-    private val importer: TasksJsonImporter,
+    private val importer: BackupImporter,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -46,8 +48,10 @@ class ImportTasksViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(NonCancellable + Dispatchers.IO) {
                 try {
-                    val result = importer.importTasks(context, uri) { message ->
-                        _state.value = ImportState.Importing(message)
+                    val result = importer.importTasks(
+                        { context.contentResolver.openInputStream(uri)!!.source() }
+                    ) { count ->
+                        _state.value = ImportState.Importing(context.getString(R.string.import_progress_read, count))
                     }
                     _state.value = ImportState.Complete(result)
                 } catch (e: Exception) {
@@ -65,7 +69,7 @@ class ImportTasksViewModel @Inject constructor(
     sealed class ImportState {
         data object Idle : ImportState()
         data class Importing(val message: String) : ImportState()
-        data class Complete(val result: TasksJsonImporter.ImportResult) : ImportState()
+        data class Complete(val result: BackupImporter.ImportResult) : ImportState()
         data object Error : ImportState()
     }
 

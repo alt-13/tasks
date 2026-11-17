@@ -3,17 +3,15 @@
 package com.todoroo.astrid.service
 
 import org.tasks.data.dao.FilterDao
-import org.tasks.filters.FilterCriteriaProvider
+import org.tasks.filters.LegacyFilterCriteria
 import javax.inject.Inject
 
 class Upgrade_13_2 @Inject constructor(
     private val filterDao: FilterDao,
-    private val filterCriteriaProvider: FilterCriteriaProvider,
 ) {
     internal suspend fun rebuildFilters() =
         filterDao.getFilters().forEach {
-            filterCriteriaProvider.rebuildFilter(it)
-            filterDao.update(it)
+            filterDao.update(LegacyFilterCriteria.rebuildFilter(it))
         }
 
     companion object {

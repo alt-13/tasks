@@ -28,6 +28,7 @@ import org.tasks.data.entity.CaldavCalendar
 import org.tasks.data.entity.CaldavTask
 import org.tasks.data.entity.TagData
 import org.tasks.data.entity.Task
+import org.tasks.data.entity.UserActivity
 import org.tasks.kmp.org.tasks.themes.ColorProvider
 import org.tasks.preferences.AppPreferences
 import org.tasks.preferences.TasksPreferences
@@ -45,7 +46,9 @@ class BackupImporterTest : DatabaseTest() {
         onBlocking { addTasksToTop() } doReturn false
     }
     private val vtodoCache by lazy { VtodoCache(caldavDao, FileStorage(folder.root.path)) }
-    private val importer by lazy {
+    private val importer by lazy { importer() }
+
+    private fun importer(hooks: BackupImportHooks = SharedBackupImportHooks(tasksPreferences)) =
         BackupImporter(
             tagDataDao = tagDataDao,
             userActivityDao = db.userActivityDao(),
@@ -62,10 +65,9 @@ class BackupImporterTest : DatabaseTest() {
             taskListMetadataDao = db.taskListMetadataDao(),
             vtodoCache = vtodoCache,
             analytics = mock(),
-            tasksPreferences = tasksPreferences,
+            hooks = hooks,
             taskMover = TaskMover(taskDao, caldavDao, db.googleTaskDao(), db.dirtyDao(), appPreferences, mock(), mock()),
         )
-    }
 
     private suspend fun import(json: String) = importer.importTasks({ Buffer().writeUtf8(json) })
 
@@ -336,6 +338,35 @@ class BackupImporterTest : DatabaseTest() {
             """{"uri":"content://org.tasks/attachments/list.jpg"}""",
             db.userActivityDao().getComments(task.id).single().picture,
         )
+    }
+
+    @Test
+    fun leavesPreferencesAndOldPicturesToHooks() = runBlocking {
+        insertLocalList()
+        val calls = mutableListOf<String>()
+        val hooks = object : BackupImportHooks {
+            override suspend fun importPreferences(name: String, json: String, version: Int) {
+                calls += "$name $json $version"
+            }
+            override fun legacyPicture(picture: String?) = "converted $picture"
+            override suspend fun afterImport(version: Int) {
+                calls += "afterImport $version"
+            }
+        }
+        val tasks = listOf(TaskBackup(Task(title = "old", remoteId = "uuid-1"), comments = listOf(UserActivity(picture = "p"))))
+        importer(hooks).importTasks({
+            Buffer().writeUtf8(
+                """{"version":545,"data":{"tasks":${Json.encodeToString(tasks)},""" +
+                    """"intPrefs":{"a":1},"longPrefs":{"b":2},"setPrefs":{"c":["d"]}}}"""
+            )
+        })
+
+        assertEquals(
+            listOf("""intPrefs {"a":1} 545""", """longPrefs {"b":2} 545""", """setPrefs {"c":["d"]} 545""", "afterImport 545"),
+            calls,
+        )
+        val task = taskDao.getAll().single()
+        assertEquals("converted p", db.userActivityDao().getComments(task.id).single().picture)
     }
 
     @Test

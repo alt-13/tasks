@@ -98,8 +98,7 @@ class BackupJsonReader(private val source: BufferedSource) : AutoCloseable {
     }
 
     companion object {
-        @PublishedApi
-        internal val lenientJson = Json {
+        val lenientJson = Json {
             isLenient = true
             ignoreUnknownKeys = true
         }

@@ -4,12 +4,16 @@ import com.natpryce.makeiteasy.MakeItEasy.with
 import com.todoroo.astrid.service.Upgrade_15_13
 import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
+import okio.Buffer
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.tasks.BuildConfig
+import org.tasks.R
 import org.tasks.data.dao.CaldavDao
 import org.tasks.data.dao.TagDataDao
 import org.tasks.data.dao.TaskDao
+import org.tasks.data.dao.UserActivityDao
 import org.tasks.data.db.Database
 import org.tasks.data.entity.CaldavAccount
 import org.tasks.data.entity.CaldavAccount.Companion.TYPE_CALDAV
@@ -18,24 +22,27 @@ import org.tasks.data.entity.CaldavAccount.Companion.TYPE_TASKS
 import org.tasks.data.entity.CaldavCalendar
 import org.tasks.data.entity.TagData
 import org.tasks.data.entity.Task
+import org.tasks.data.entity.UserActivity
 import org.tasks.injection.InjectingTestCase
 import org.tasks.makers.CaldavTaskMaker.CALENDAR
 import org.tasks.makers.CaldavTaskMaker.OBJECT
 import org.tasks.makers.CaldavTaskMaker.REMOTE_ID
 import org.tasks.makers.CaldavTaskMaker.TASK
 import org.tasks.makers.CaldavTaskMaker.newCaldavTask
-import java.io.ByteArrayInputStream
+import org.tasks.preferences.Preferences
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
 @HiltAndroidTest
-class TasksJsonImporterTest : InjectingTestCase() {
+class BackupRoundTripTest : InjectingTestCase() {
     @Inject lateinit var jsonExporter: TasksJsonExporter
-    @Inject lateinit var jsonImporter: TasksJsonImporter
+    @Inject lateinit var importer: BackupImporter
     @Inject lateinit var taskDao: TaskDao
     @Inject lateinit var caldavDao: CaldavDao
     @Inject lateinit var tagDataDao: TagDataDao
     @Inject lateinit var database: Database
+    @Inject lateinit var userActivityDao: UserActivityDao
+    @Inject lateinit var preferences: Preferences
 
     private suspend fun export(): ByteArray {
         val os = ByteArrayOutputStream()
@@ -43,8 +50,8 @@ class TasksJsonImporterTest : InjectingTestCase() {
         return os.toByteArray()
     }
 
-    private suspend fun import(backup: ByteArray): TasksJsonImporter.ImportResult =
-        jsonImporter.importTasks(context, { ByteArrayInputStream(backup) })
+    private suspend fun import(backup: ByteArray): BackupImporter.ImportResult =
+        importer.importTasks({ Buffer().write(backup) })
 
     private fun ByteArray.withVersion(version: Int) = String(this, Charsets.UTF_8)
         .replace("\"version\":${BuildConfig.VERSION_CODE}", "\"version\":$version")
@@ -285,5 +292,34 @@ class TasksJsonImporterTest : InjectingTestCase() {
 
         assertEquals(1, tagDataDao.getAll().size)
         assertEquals("important", tagDataDao.getAll()[0].name)
+    }
+
+    @Test
+    fun importsAllPreferencesIntoAndroidPreferences() = runBlocking {
+        val installDate = context.getString(R.string.p_install_date)
+        preferences.setLong(installDate, 1)
+        import(
+            ("""{"version":${BuildConfig.VERSION_CODE},"data":{"intPrefs":{"test_int":3},""" +
+                """"longPrefs":{"test_long":5,"$installDate":7},"stringPrefs":{"test_string":"x"},""" +
+                """"boolPrefs":{"test_bool":true}}}""").toByteArray()
+        )
+
+        assertEquals(3, preferences.getInt("test_int", 0))
+        assertEquals(5L, preferences.getLong("test_long", 0))
+        assertEquals(1L, preferences.getLong(installDate, 0))
+        assertEquals("x", preferences.getStringValue("test_string"))
+        assertEquals(true, preferences.getBoolean("test_bool", false))
+    }
+
+    @Test
+    fun convertsCommentPicturesFromBefore6_4() = runBlocking {
+        val backup = TaskBackup(
+            task = Task(title = "old", remoteId = "uuid-1"),
+            comments = listOf(UserActivity(message = "pic", picture = """{"path":"/sdcard/pic.jpg"}""")),
+        )
+        import("""{"version":545,"data":{"tasks":${Json.encodeToString(listOf(backup))}}}""".toByteArray())
+
+        val task = taskDao.getAll().single()
+        assertEquals("file:///sdcard/pic.jpg", userActivityDao.getComments(task.id).single().picture)
     }
 }
