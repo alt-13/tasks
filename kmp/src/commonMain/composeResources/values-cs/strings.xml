@@ -622,4 +622,5 @@
     <string name="import_progress_read">Načítání úkolu %1$d…</string>
     <string name="import_failed">Import selhal</string>
     <string name="import_failed_message">Nepodařilo se přečíst soubor zálohy</string>
+    <string name="backup_BAc_import">Importovat zálohu</string>
 </resources>

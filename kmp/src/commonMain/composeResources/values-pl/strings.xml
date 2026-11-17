@@ -483,4 +483,5 @@
     <string name="import_progress_read">Czytanie zadania %1$d…</string>
     <string name="import_failed">Import nie powiódł się</string>
     <string name="import_failed_message">Nie udało się odczytać pliku kopii zapasowej</string>
+    <string name="backup_BAc_import">Importuj kopię zapasową</string>
 </resources>

@@ -303,4 +303,5 @@
     <string name="import_summary_title">سمری بحال کریں</string>
     <string name="import_summary_message">فائل%1$s میں%2$sشامل ہے۔\n\n%3$s درآمد ہو گیا،\n%4$s پہلے سے موجود ہے\n%5$s میں خرابیاں تھیں</string>
     <string name="import_progress_read">%1$d ٹاسک پڑھا جا رہا ہے…</string>
+    <string name="backup_BAc_import">بیک اپ امپورٹ کریں</string>
 </resources>

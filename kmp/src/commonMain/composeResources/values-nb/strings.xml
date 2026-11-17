@@ -439,4 +439,5 @@
     <string name="import_summary_title">Gjennopprettingssammendrag</string>
     <string name="import_summary_message">Filen %1$s inneholder %2$s.\n\n%3$s importert,\n%4$s finnes allerede\n%5$s inneholdt feil</string>
     <string name="import_progress_read">Leser gjøremål %1$d…</string>
+    <string name="backup_BAc_import">Importer sikkerhetskopi</string>
 </resources>

@@ -458,4 +458,5 @@
     <string name="import_summary_title">Resumo de restauración</string>
     <string name="import_summary_message">O ficheiro %1$s contiña %2$s.\n\n%3$s importadas\n%4$s xa existían\n%5$s tiñan erros</string>
     <string name="import_progress_read">Lendo a tarefa %1$d…</string>
+    <string name="backup_BAc_import">Importar tarefas</string>
 </resources>

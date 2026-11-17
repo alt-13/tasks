@@ -237,4 +237,5 @@
     <string name="import_progress_read">%1$d-vazifa o'qilmoqda…</string>
     <string name="import_failed">Yuklab bo'lmadi</string>
     <string name="import_failed_message">Zaxira faylini o'qib bo'lmadi</string>
+    <string name="backup_BAc_import">Zahirani yuklash</string>
 </resources>

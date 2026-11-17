@@ -748,4 +748,5 @@
     <string name="import_progress_read">Lecture de la tâche %1$d…</string>
     <string name="import_failed">Échec de l'importation</string>
     <string name="import_failed_message">Impossible de lire le fichier de sauvegarde</string>
+    <string name="backup_BAc_import">Importer une sauvegarde</string>
 </resources>

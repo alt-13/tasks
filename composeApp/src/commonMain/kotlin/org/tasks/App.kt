@@ -1049,6 +1049,7 @@ fun App(
                                 cloudSignInSource = AnalyticsEvents.SOURCE_SETTINGS
                             },
                             onSubscribedClick = { showManageSheet = true },
+                            onImportBackup = importViewModel?.let { it::import },
                         )
                         if (showManageSheet) {
                             val provider = subscriptionInfo?.provider
@@ -2939,6 +2940,8 @@ private fun SettingsScreen(
     onMigrateToCloud: () -> Unit = {},
     onSignInClick: () -> Unit = {},
     onSubscribedClick: () -> Unit = {},
+    // null where import isn't supported, so Backups keeps its placeholder
+    onImportBackup: (() -> Unit)? = null,
 ) {
     val viewModel = koinViewModel<MainSettingsViewModel>()
     val proCardViewModel = koinViewModel<ProCardViewModel>()
@@ -3165,6 +3168,14 @@ private fun SettingsScreen(
                             onNavigateBack = {
                                 scope.launch { navigator.navigateBack() }
                             },
+                        )
+                    }
+                    is org.tasks.compose.settings.SettingsDestination.Backups if onImportBackup != null -> {
+                        org.tasks.compose.settings.BackupsDetail(
+                            onNavigateBack = {
+                                scope.launch { navigator.navigateBack() }
+                            },
+                            onImportBackup = onImportBackup,
                         )
                     }
                     is org.tasks.compose.settings.SettingsDestination -> {

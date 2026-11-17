@@ -458,4 +458,5 @@
     <string name="import_summary_title">Επαναφορά σύνοψης</string>
     <string name="import_summary_message">Αρχείο %1$s περιέχεται %2$s.\n\n%3$s καταχωρήθηκε,\n%4$s υπάρχει ήδη\n%5$s έχει σφάλματα</string>
     <string name="import_progress_read">Ανάγνωση εργασίας %1$d…</string>
+    <string name="backup_BAc_import">Εισαγωγή backup</string>
 </resources>

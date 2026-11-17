@@ -18,4 +18,5 @@
     <string name="import_summary_title">সারাংশ পুনরুদ্ধার করো</string>
     <string name="import_summary_message">%1$s ফাইলটিতে %2$s রয়েছে।\n\n%3$s আমদানি করা,\n%4$s ইতিমধ্যে বিদ্যমান\n%5$s এর ত্রুটি ছিল</string>
     <string name="import_progress_read">%1$d কাজ পড়া হচ্ছে…</string>
+    <string name="backup_BAc_import">টাস্ক(কাজ) আনুন</string>
 </resources>

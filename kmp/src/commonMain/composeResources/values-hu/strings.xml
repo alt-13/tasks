@@ -525,4 +525,5 @@
     <string name="import_progress_read">%1$d feladat felolvasása…</string>
     <string name="import_failed">Sikertelen importálás</string>
     <string name="import_failed_message">A mentés fájlja nem olvasható</string>
+    <string name="backup_BAc_import">Mentés importálása</string>
 </resources>

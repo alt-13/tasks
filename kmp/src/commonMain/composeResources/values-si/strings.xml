@@ -397,4 +397,5 @@
     <string name="import_summary_title">ප්‍රතිස්ථාපන සාරාංශය</string>
     <string name="import_summary_message">%1$s ගොනුවේ %2$s අඩංගු වේ.\n\n%3$s ආනයනය කරන ලදී\n%4$s දැනටමත් පවතී\n%5$s දෝෂ සහිත විය</string>
     <string name="import_progress_read">කියවීමේ කාර්යය %1$d…</string>
+    <string name="backup_BAc_import">උපස්ථය ආයාත කරන්න</string>
 </resources>

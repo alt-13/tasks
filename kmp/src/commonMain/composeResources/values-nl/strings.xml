@@ -728,4 +728,5 @@
     <string name="import_progress_read">Taak %1$d lezen…</string>
     <string name="import_failed">Import mislukt</string>
     <string name="import_failed_message">Kon het backupbestand niet lezen</string>
+    <string name="backup_BAc_import">Backup importeren</string>
 </resources>

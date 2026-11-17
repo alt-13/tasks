@@ -479,4 +479,5 @@
     <string name="import_progress_read">Luetaan tehtävää %1$d…</string>
     <string name="import_failed">Tuonti epäonnistui</string>
     <string name="import_failed_message">Varmuuskopiota ei voitu lukea</string>
+    <string name="backup_BAc_import">Tuo varmuuskopio</string>
 </resources>

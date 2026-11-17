@@ -571,4 +571,5 @@
     <string name="import_progress_read">Lendo a tarefa %1$d…</string>
     <string name="import_failed">Importação falhou</string>
     <string name="import_failed_message">Erro ao ler ficheiro de backup</string>
+    <string name="backup_BAc_import">Importar cópia de segurança</string>
 </resources>

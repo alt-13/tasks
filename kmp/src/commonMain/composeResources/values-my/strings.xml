@@ -38,4 +38,5 @@
     <string name="more_options">ပိုမိုရွေးချယ်စရာများ</string>
     <string name="import_summary_message">ဖိုင် %1$s ပါဝင်သည် %2$s.\n\n%3$s သွင်းပြီး,\n%4$s ရိှပြီးသား\n%5$s ချို့ယွင်းမှုများရိှ</string>
     <string name="import_progress_read">လုပ်စရာကိုကြည့်နေသည် %1$d…</string>
+    <string name="backup_BAc_import">အရန်သိမ်းထားသည်များကိုပြန်သွင်းမည်</string>
 </resources>

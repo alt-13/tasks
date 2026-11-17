@@ -599,4 +599,5 @@
     <string name="import_progress_read">Чтение задачи %1$d…</string>
     <string name="import_failed">Не удалось импортировать</string>
     <string name="import_failed_message">Не удалось прочитать файл резервной копии</string>
+    <string name="backup_BAc_import">Импортировать резервную копию</string>
 </resources>

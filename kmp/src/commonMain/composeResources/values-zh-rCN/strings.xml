@@ -719,4 +719,5 @@
     <string name="import_progress_read">正在读取任务 %1$d…</string>
     <string name="import_failed">导入失败</string>
     <string name="import_failed_message">无法读取备份文件</string>
+    <string name="backup_BAc_import">导入备份</string>
 </resources>

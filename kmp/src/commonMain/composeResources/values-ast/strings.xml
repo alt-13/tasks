@@ -346,4 +346,5 @@
     <string name="import_summary_title">Resume de restauración</string>
     <string name="import_summary_message">El ficheru %1$s contenía %2$s\n\n%3$s importaes\n%4$s yá esiste\n%5$s teníen errores</string>
     <string name="import_progress_read">Lleendo xera %1$d…</string>
+    <string name="backup_BAc_import">Importar copia de seguranza</string>
 </resources>

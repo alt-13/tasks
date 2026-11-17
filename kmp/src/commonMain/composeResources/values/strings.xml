@@ -733,4 +733,5 @@
     <string name="import_progress_read">Reading task %1$d…</string>
     <string name="import_failed">Import failed</string>
     <string name="import_failed_message">Could not read backup file</string>
+    <string name="backup_BAc_import">Import backup</string>
 </resources>

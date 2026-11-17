@@ -673,4 +673,5 @@
     <string name="import_progress_read">Membaca tugas %1$d …</string>
     <string name="import_failed">Impor gagal</string>
     <string name="import_failed_message">Tidak dapat membaca file cadangan</string>
+    <string name="backup_BAc_import">Impor Cadangan</string>
 </resources>

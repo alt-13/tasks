@@ -76,4 +76,5 @@
     <string name="import_summary_title">Аднавіць зводку</string>
     <string name="import_summary_message">Файл %1$s утрымліваў %2$s.\n\n%3$s імпартавана,\n%4$s ужо існуюць,\n%5$s з памылкамі</string>
     <string name="import_progress_read">Чытанне задачы %1$d…</string>
+    <string name="backup_BAc_import">Імпартаваць рэзервовую копію</string>
 </resources>

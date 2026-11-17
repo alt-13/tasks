@@ -46,4 +46,5 @@
     <string name="import_progress_read">Les verkefni %1$d…</string>
     <string name="import_failed">Innflutningur mistókst</string>
     <string name="import_failed_message">Gat ekki lesið afritsskránna</string>
+    <string name="backup_BAc_import">Flytja inn afrit</string>
 </resources>

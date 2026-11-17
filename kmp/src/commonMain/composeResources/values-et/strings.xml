@@ -718,4 +718,5 @@
     <string name="import_progress_read">Loeme ülesannet %1$d…</string>
     <string name="import_failed">Importimine ei õnnestunud</string>
     <string name="import_failed_message">Varukoopia faili lugemine ei õnnestunud</string>
+    <string name="backup_BAc_import">Impordi varukoopia</string>
 </resources>

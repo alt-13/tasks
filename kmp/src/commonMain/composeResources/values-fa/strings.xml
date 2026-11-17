@@ -208,4 +208,5 @@
     <string name="import_progress_read">درحال خواندن تسک %1$d…</string>
     <string name="import_failed">وارد کردن ناموفق بود</string>
     <string name="import_failed_message">نتوانست فایل پشتیبان را بخواند</string>
+    <string name="backup_BAc_import">لود کردن بکاپ</string>
 </resources>

@@ -363,4 +363,5 @@
     <string name="import_progress_read">กำลังอ่านแผนงาน %1$d…</string>
     <string name="import_failed">การนำเข้าล้มเหลว</string>
     <string name="import_failed_message">ไม่สามารถอ่านไฟล์ที่สำรองได้</string>
+    <string name="backup_BAc_import">นําเข้าสําเนาสํารอง</string>
 </resources>

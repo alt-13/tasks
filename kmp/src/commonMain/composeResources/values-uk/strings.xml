@@ -508,4 +508,5 @@
     <string name="import_progress_read">Читання завдання %1$d…</string>
     <string name="import_failed">Не вдалося імпортувати</string>
     <string name="import_failed_message">Не вдалося прочитати файл резервної копії</string>
+    <string name="backup_BAc_import">Імпортувати резервну копію</string>
 </resources>

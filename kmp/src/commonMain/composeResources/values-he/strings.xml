@@ -595,4 +595,5 @@
     <string name="import_progress_read">נקראת משימה %1$d…</string>
     <string name="import_failed">הייבוא נכשל</string>
     <string name="import_failed_message">לא היה ניתן לקרוא קובץ גיבוי</string>
+    <string name="backup_BAc_import">ייבוא גיבוי</string>
 </resources>

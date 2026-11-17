@@ -476,4 +476,5 @@
     <string name="import_summary_title">Obnoviť zhrnutie</string>
     <string name="import_summary_message">Súbor %1$s obsahoval %2$s.\n\n%3$s importovaných,\n%4$s už existuje\n%5$s je chybných</string>
     <string name="import_progress_read">Načítavam úlohu %1$d…</string>
+    <string name="backup_BAc_import">Importovať zálohu</string>
 </resources>
