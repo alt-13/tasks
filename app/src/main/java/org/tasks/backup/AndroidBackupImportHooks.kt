@@ -7,6 +7,7 @@ import com.todoroo.astrid.service.Upgrader.Companion.getAndroidColor
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.tasks.R
 import org.tasks.backup.BackupJsonReader.Companion.lenientJson
+import org.tasks.data.entity.Task
 import org.tasks.data.getLegacyPictureUri
 import org.tasks.jobs.BackgroundWork
 import org.tasks.notifications.Notifier
@@ -36,6 +37,13 @@ class AndroidBackupImportHooks @Inject constructor(
         lenientJson.decodeFromString<Map<String, T>>(this).filterKeys { it !in ignoreKeys }
 
     override fun legacyPicture(picture: String?) = getLegacyPictureUri(picture)?.toString()
+
+    override fun taskImported(task: Task, version: Int) {
+        // the old importer saved these tasks with TaskSaver, which updates their calendar event
+        if (version < Upgrader.V12_4 && task.calendarURI?.isNotBlank() == true) {
+            backgroundWork.updateCalendar(task)
+        }
+    }
 
     override suspend fun afterImport(version: Int) {
         if (version < Upgrader.V8_2) {

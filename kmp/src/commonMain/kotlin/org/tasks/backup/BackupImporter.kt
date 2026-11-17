@@ -385,6 +385,7 @@ class BackupImporter(
             .map { it.copy(task = taskId) }
             .takeIf { it.isNotEmpty() }
             ?.let { alarmDao.insert(it) }
+        hooks.taskImported(task, version)
         backup.comments?.forEach { comment ->
             comment.targetId = task.uuid
             if (version < LEGACY_PICTURE_VERSION) {

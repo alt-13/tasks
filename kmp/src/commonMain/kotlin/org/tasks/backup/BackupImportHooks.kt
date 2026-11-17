@@ -2,6 +2,7 @@ package org.tasks.backup
 
 import androidx.datastore.preferences.core.Preferences
 import org.tasks.backup.BackupJsonReader.Companion.lenientJson
+import org.tasks.data.entity.Task
 import org.tasks.preferences.TasksPreferences
 
 /** The parts of [BackupImporter] that differ between Android and the shared app. */
@@ -11,6 +12,9 @@ interface BackupImportHooks {
 
     /** Converts a comment picture from a backup made before 6.4. */
     fun legacyPicture(picture: String?): String? = picture
+
+    /** Runs after [task] and its alarms are inserted. */
+    fun taskImported(task: Task, version: Int) {}
 
     /** Runs after the tasks are imported. */
     suspend fun afterImport(version: Int) {}

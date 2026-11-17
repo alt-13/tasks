@@ -349,6 +349,9 @@ class BackupImporterTest : DatabaseTest() {
                 calls += "$name $json $version"
             }
             override fun legacyPicture(picture: String?) = "converted $picture"
+            override fun taskImported(task: Task, version: Int) {
+                calls += "taskImported ${task.title} ${task.id > 0} $version"
+            }
             override suspend fun afterImport(version: Int) {
                 calls += "afterImport $version"
             }
@@ -362,7 +365,10 @@ class BackupImporterTest : DatabaseTest() {
         })
 
         assertEquals(
-            listOf("""intPrefs {"a":1} 545""", """longPrefs {"b":2} 545""", """setPrefs {"c":["d"]} 545""", "afterImport 545"),
+            listOf(
+                """intPrefs {"a":1} 545""", """longPrefs {"b":2} 545""", """setPrefs {"c":["d"]} 545""",
+                "taskImported old true 545", "afterImport 545",
+            ),
             calls,
         )
         val task = taskDao.getAll().single()
